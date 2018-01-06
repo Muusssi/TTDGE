@@ -2,6 +2,7 @@ import java.util.PriorityQueue;
 import java.util.HashSet;
 
 final int GRID_SIZE = 50;
+final boolean SHOW_SEARCHED_POINTS = true;
 
 int x_offset = 50;
 int y_offset = 50;
@@ -62,7 +63,9 @@ public class Room {
 
   void draw() {
     pushStyle();
-    //noFill();
+    if (SHOW_SEARCHED_POINTS) {
+      noFill();
+    }
     rect(x_offset, y_offset, room_width*GRID_SIZE, room_height*GRID_SIZE);
     popStyle();
     for (int i = 0; i < room_width; ++i) {
@@ -145,7 +148,7 @@ public class GameCharacter extends Thing {
   int x = 0;
   int y = 0;
 
-  int speed = 2;
+  int speed = 4;
 
   int radius = GRID_SIZE/3;
 
@@ -314,6 +317,13 @@ public class GameCharacter extends Thing {
 
     while (open.size() > 0) {
       wp = open.poll();
+      if (SHOW_SEARCHED_POINTS) {
+        pushStyle();
+        fill(255, 0, 0);
+        noStroke();
+        ellipse(wp.x + x_offset, wp.y + y_offset, 5, 5);
+        popStyle();
+      }
       if (wp.estimate == 0) {
         this.path = wp.path_here;
         return;

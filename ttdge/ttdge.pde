@@ -38,6 +38,9 @@ void keyReleased() {
 
 
 void mousePressed() {
+  if (SHOW_SEARCHED_POINTS) {
+    background(200);
+  }
   player.new_target(mouseX - x_offset, mouseY - y_offset);
 }
 
