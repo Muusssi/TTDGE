@@ -35,7 +35,7 @@ public class World {
 
 }
 
-void draw_acticve_room() {
+void draw_active_room() {
   if (player != null && player.room != null) {
     player.room.draw();
   }
@@ -148,7 +148,7 @@ public class GameCharacter extends Thing {
   int x = 0;
   int y = 0;
 
-  int speed = 4;
+  int speed = 2;
 
   int radius = GRID_SIZE/3;
 
@@ -310,7 +310,8 @@ public class GameCharacter extends Thing {
     PriorityQueue<WayPoint> open = new PriorityQueue<WayPoint>();
     HashSet<String> closed = new HashSet<String>();
 
-    WayPoint wp = new WayPoint("", this.x, this.y, this.room_target_x, this.room_target_y, this.speed);
+    WayPoint wp = new WayPoint("", this.x, this.y, this.room_target_x,
+                                this.room_target_y, this.speed);
     open.add(wp);
     String wp_key = this.x + "_" + this.y;
     closed.add(wp_key);
@@ -333,21 +334,24 @@ public class GameCharacter extends Thing {
         wp_key = wp.x + "_" + (wp.y - this.speed);
         if (!closed.contains(wp_key)) {
           closed.add(wp_key);
-          open.add(new WayPoint("w" + wp.path_here, wp.x, wp.y - this.speed, this.room_target_x, this.room_target_y, this.speed));
+          open.add(new WayPoint("w" + wp.path_here, wp.x, wp.y - this.speed,
+                  this.room_target_x, this.room_target_y, this.speed));
         }
 
         if (this.can_move_left(wp.x, wp.y)) {
           wp_key = (wp.x - this.speed) + "_" + (wp.y - this.speed);
           if (!closed.contains(wp_key)) {
             closed.add(wp_key);
-            open.add(new WayPoint("q" + wp.path_here, wp.x - this.speed, wp.y - this.speed, this.room_target_x, this.room_target_y, this.speed));
+            open.add(new WayPoint("q" + wp.path_here, wp.x - this.speed, wp.y - this.speed,
+                    this.room_target_x, this.room_target_y, this.speed));
           }
         }
         if (this.can_move_right(wp.x, wp.y)) {
           wp_key = (wp.x + this.speed) + "_" + (wp.y - this.speed);
           if (!closed.contains(wp_key)) {
             closed.add(wp_key);
-            open.add(new WayPoint("e" + wp.path_here, wp.x + this.speed, wp.y - this.speed, this.room_target_x, this.room_target_y, this.speed));
+            open.add(new WayPoint("e" + wp.path_here, wp.x + this.speed, wp.y - this.speed,
+                                  this.room_target_x, this.room_target_y, this.speed));
           }
         }
       }
@@ -356,7 +360,8 @@ public class GameCharacter extends Thing {
         wp_key = (wp.x - this.speed) + "_" + wp.y;
         if (!closed.contains(wp_key)) {
           closed.add(wp_key);
-          open.add(new WayPoint("a" + wp.path_here, wp.x - this.speed, wp.y, this.room_target_x, this.room_target_y, this.speed));
+          open.add(new WayPoint("a" + wp.path_here, wp.x - this.speed, wp.y,
+                                this.room_target_x, this.room_target_y, this.speed));
         }
       }
 
@@ -364,21 +369,24 @@ public class GameCharacter extends Thing {
         wp_key = wp.x + "_" + (wp.y + this.speed);
         if (!closed.contains(wp_key)) {
           closed.add(wp_key);
-          open.add(new WayPoint("s" + wp.path_here, wp.x, wp.y + this.speed, this.room_target_x, this.room_target_y, this.speed));
+          open.add(new WayPoint("s" + wp.path_here, wp.x, wp.y + this.speed,
+                                this.room_target_x, this.room_target_y, this.speed));
         }
 
         if (this.can_move_left(wp.x, wp.y)) {
           wp_key = (wp.x - this.speed) + "_" + (wp.y + this.speed);
           if (!closed.contains(wp_key)) {
             closed.add(wp_key);
-            open.add(new WayPoint("z" + wp.path_here, wp.x - this.speed, wp.y + this.speed, this.room_target_x, this.room_target_y, this.speed));
+            open.add(new WayPoint("z" + wp.path_here, wp.x - this.speed, wp.y + this.speed,
+                                  this.room_target_x, this.room_target_y, this.speed));
           }
         }
         if (this.can_move_right(wp.x, wp.y)) {
           wp_key = (wp.x + this.speed) + "_" + (wp.y + this.speed);
           if (!closed.contains(wp_key)) {
             closed.add(wp_key);
-            open.add(new WayPoint("x" + wp.path_here, wp.x + this.speed, wp.y + this.speed, this.room_target_x, this.room_target_y, this.speed));
+            open.add(new WayPoint("x" + wp.path_here, wp.x + this.speed, wp.y + this.speed,
+                                  this.room_target_x, this.room_target_y, this.speed));
           }
         }
       }
@@ -387,20 +395,10 @@ public class GameCharacter extends Thing {
         wp_key = (wp.x + this.speed) + "_" + wp.y;
         if (!closed.contains(wp_key)) {
           closed.add(wp_key);
-          open.add(new WayPoint("d" + wp.path_here, wp.x + this.speed, wp.y, this.room_target_x, this.room_target_y, this.speed));
+          open.add(new WayPoint("d" + wp.path_here, wp.x + this.speed, wp.y,
+                                this.room_target_x, this.room_target_y, this.speed));
         }
       }
-
-    }
-  }
-
-  void drop(Item item) {
-    // TODO
-    if (this.room != null) {
-
-    }
-    else {
-      error("Can not drop item '"+item.name+"'!");
     }
   }
 
@@ -506,6 +504,9 @@ Various utilities
 
 */
 
+/**
+ * Used for GameCharacter path finding
+ */
 class WayPoint implements Comparable<WayPoint>  {
 
   String path_here = "";
@@ -518,8 +519,6 @@ class WayPoint implements Comparable<WayPoint>  {
     this.estimate = (abs(x - target_x) + abs(y - target_y));
   }
 
-
-  //@Override
   public int compareTo(WayPoint other) {
     return Integer.compare(
         this.path_here.length() + this.estimate,
