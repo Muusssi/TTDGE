@@ -2,7 +2,7 @@ import java.util.PriorityQueue;
 import java.util.HashSet;
 
 final int GRID_SIZE = 50;
-final boolean SHOW_SEARCHED_POINTS = true;
+final boolean SHOW_SEARCHED_POINTS = false;
 
 int x_offset = 50;
 int y_offset = 50;

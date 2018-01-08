@@ -21,7 +21,7 @@ void setup() {
 }
 
 void draw() {
-  draw_acticve_room();
+  draw_active_room();
   move_by_wasd();
   player.draw();
   player.move_to_target();
