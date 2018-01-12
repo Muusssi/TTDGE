@@ -1,3 +1,10 @@
+/* The engine for TTDGE (Tommi's Top-Down Game Engine)
+ */
+
+final String ENGINE_VERSION = "0.1";
+final String WORLD_FILE_DELIMITER = "||";
+
+
 import java.util.PriorityQueue;
 import java.util.HashSet;
 
@@ -21,19 +28,142 @@ void error(String message) {
 }
 
 
+World load_world(String world_file) {
+  String[] lines = loadStrings(world_file);
+  World new_world = null;
+  for (String line : lines) {
+    if (!line.substring(0, 1).equals("#")) {
+      String[] tokens = split(line, WORLD_FILE_DELIMITER);
+      String thing_type = tokens[0];
+      if (thing_type.equals("World")) {
+        new_world = create_world(tokens);
+        new_world.world_file = world_file;
+      }
+      else {
+        if (new_world == null) {
+          fatal_error("Corrupted world file '"+world_file+"'. World not first thing.");
+          return null;
+        }
+        new_world.load_thing(tokens);
+      }
+    }
+
+  }
+  return new_world;
+}
+
+
+World create_world(String[] values) {
+  if (values.length != 2) {
+    fatal_error("Failed to load world. Corrupted world file.");
+    return null;
+  }
+  return new World(values[1]);
+}
+
+HashMap<String,World> worlds = new HashMap<String,World>();
+
 public class World {
+
+  String name;
+  String world_file = null;
+
+  int id_counter = 1;
+
+  HashMap<String,Thing> things = new HashMap<String,Thing>();
 
   ArrayList<Room> rooms = new ArrayList<Room>();
   Room starting_room = null;
 
 
-  public World() {
-    if (default_world == null) {
-      default_world = this;
-    }
+  public World(String name) {
+    this.name = name;
+    worlds.put(name, this);
   }
 
+  String world_file_string() {
+    return "World"+WORLD_FILE_DELIMITER+name;
+  }
+
+  Thing load_thing(String[] tokens) {
+    String thing_type = tokens[0];
+    if (thing_type.equals("Room")) {
+      create_room(tokens);
+    }
+    else if (thing_type.equals("Door")) {
+      create_door(tokens);
+    }
+    else if (thing_type.equals("Obstacle")) {
+      create_obstacle(tokens);
+    }
+    else if (thing_type.equals("GameCharacter")) {
+      create_character(tokens);
+    }
+    else if (thing_type.equals("Item")) {
+      create_item(tokens);
+    }
+    else {
+      fatal_error("World file corrupted: '"+world_file+"'. Unsupported thing: '"+thing_type+"'");
+    }
+    return null;
+  }
+
+  int id_counter_next() {
+    return id_counter++;
+  }
 }
+
+
+
+public abstract class Thing {
+
+  String id;
+  World world;
+  String name = "Thing";
+
+  Room room;
+  int room_x, room_y;
+
+  public Thing (World world) {
+    this.id = id();
+    this.world = world;
+    world.things.put(this.id, this);
+  }
+
+  void investigate() {}
+
+  void hit() {}
+
+  void eat() {}
+
+  void open() {}
+
+  void close() {}
+
+  void take() {}
+
+  void operate() {}
+
+  boolean collide() {
+    return false;
+  }
+
+  void draw() {
+    error("Draw for a thing is not implemented.");
+  }
+
+  String id() {
+    return id_prefix() + "-" + world.id_counter_next();
+  }
+
+  abstract String id_prefix();
+
+  abstract String world_file_string();
+
+
+
+}
+
 
 void draw_active_room() {
   if (player != null && player.room != null) {
@@ -47,18 +177,24 @@ void draw_active_room() {
   }
 }
 
-public class Room {
+Room create_room(String[] tokens) {
+  // TODO
+  return null;
+}
+
+public class Room extends Thing {
 
   Thing[][] grid;
 
   int room_width;
   int room_height;
 
-  public Room (int room_width, int room_height) {
+  public Room (World world, int room_width, int room_height) {
+    super(world);
     grid = new Thing[room_width][room_height];
     this.room_width = room_width;
     this.room_height = room_height;
-    default_world.rooms.add(this);
+    world.rooms.add(this);
   }
 
   void draw() {
@@ -105,41 +241,21 @@ public class Room {
     }
   }
 
+  String id_prefix() {
+    return "d";
+  }
+
+  String world_file_string() {
+    // TODO
+    return "";
+  }
+
 }
 
 
-public class Thing {
-
-  Room room;
-  int room_x, room_y;
-  String name = "Thing";
-
-  public Thing () {
-
-  }
-
-  void investigate() {}
-
-  void hit() {}
-
-  void eat() {}
-
-  void open() {}
-
-  void close() {}
-
-  void take() {}
-
-  void operate() {}
-
-  boolean collide() {
-    return false;
-  }
-
-  void draw() {
-    error("Draw for a thing is not implemented.");
-  }
-
+GameCharacter create_character(String[] tokens) {
+  // TODO
+  return null;
 }
 
 public class GameCharacter extends Thing {
@@ -159,8 +275,8 @@ public class GameCharacter extends Thing {
   int room_target_y = -1;
   String path = null;
 
-  public GameCharacter () {
-    super();
+  public GameCharacter(World world) {
+    super(world);
   }
 
   void draw() {
@@ -287,6 +403,11 @@ public class GameCharacter extends Thing {
     return true;
   }
 
+  boolean touches_obstacle() {
+
+    return false;
+  }
+
   void move_to_target() {
     if (path != null && path.length() > 0) {
       this.move(path.charAt(path.length() - 1));
@@ -303,8 +424,12 @@ public class GameCharacter extends Thing {
     update_path();
   }
 
+  void follow(GameCharacter other) {
+    // TODO
+  }
+
   /**
-   * Updates the GameCharaters path using the A* algorithm
+   * Updates the GameCharacters path using the A* algorithm
    */
   void update_path() {
     PriorityQueue<WayPoint> open = new PriorityQueue<WayPoint>();
@@ -402,15 +527,29 @@ public class GameCharacter extends Thing {
     }
   }
 
+  String id_prefix() {
+    return "GameCharacter";
+  }
+
+  String world_file_string() {
+    // TODO
+    return "";
+  }
+
 }
 
+
+Obstacle create_obstacle(String[] tokens) {
+  // TODO
+  return null;
+}
 
 public class Obstacle extends Thing {
 
   String name = "Obstacle";
 
-  public Obstacle () {
-    super();
+  public Obstacle(World world) {
+    super(world);
   }
 
   void draw() {
@@ -424,17 +563,46 @@ public class Obstacle extends Thing {
     return true;
   }
 
+  String id_prefix() {
+    return "Obstacle";
+  }
+
+  String world_file_string() {
+    // TODO
+    return "";
+  }
+
 }
 
+
+Door create_door(String[] tokens) {
+  // TODO
+  return null;
+}
 
 public class Door extends Thing {
 
   String name = "Door";
 
-  public Door () {
-    super();
+  public Door(World world) {
+    super(world);
   }
 
+  String id_prefix() {
+    return "Door";
+  }
+
+  String world_file_string() {
+    // TODO
+    return "";
+  }
+
+}
+
+
+Item create_item(String[] tokens) {
+  // TODO
+  return null;
 }
 
 public class Item extends Thing {
@@ -444,8 +612,8 @@ public class Item extends Thing {
   int x = 0;
   int y = 0;
 
-  public Item () {
-    super();
+  public Item(World world) {
+    super(world);
   }
 
   void put(Room room, int x, int y) {
@@ -455,6 +623,15 @@ public class Item extends Thing {
       this.x = x;
       this.y = y;
     }
+  }
+
+  String id_prefix() {
+    return "Item";
+  }
+
+  String world_file_string() {
+    // TODO
+    return "";
   }
 
 
