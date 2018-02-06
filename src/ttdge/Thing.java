@@ -9,8 +9,10 @@ public abstract class Thing {
   public Room room;
   public int room_x, room_y;
 
+  public String[] load_tokens = null;
+
   public Thing (World world, String id, String name) {
-    if (name == null || name.equals("")) {
+    if (name == null || name.equals("null")) {
       this.name = this.default_name();
     }
     else {
@@ -19,7 +21,7 @@ public abstract class Thing {
     this.name = name;
     this.world = world;
 
-    if (id == null) {
+    if (id == null || id.equals("null")) {
       this.id = id();
     }
     else {
@@ -29,21 +31,25 @@ public abstract class Thing {
 
   }
 
-  public void investigate() {}
+  public void investigate() {
+    TTDGE.message("This clearly is a " + this.name);
+  }
 
-  public void hit() {}
+  public void go(GameCharacter game_character) {}
 
-  public void eat() {}
+  public void hit(GameCharacter game_character) {}
 
-  public void open() {}
+  public void eat(GameCharacter game_character) {}
 
-  public void close() {}
+  public void open(GameCharacter game_character) {}
 
-  public void take() {}
+  public void close(GameCharacter game_character) {}
 
-  public void operate() {}
+  public void take(GameCharacter game_character) {}
 
-  public boolean collide() {
+  public void operate(GameCharacter game_character) {}
+
+  public boolean collide(GameCharacter game_character) {
     return false;
   }
 
@@ -59,6 +65,8 @@ public abstract class Thing {
   public abstract String world_file_string();
 
   public abstract void draw();
+
+  public abstract void linking_actions();
 
 
 

@@ -8,12 +8,27 @@ public class Room extends Thing {
   int room_height;
 
 
-  public Room (World world, String id, int room_width, int room_height) {
-    super(world, id, "Room");
+  public Room (World world, String id, String name, int room_width, int room_height) {
+    super(world, id, name);
     grid = new Thing[room_width][room_height];
     this.room_width = room_width;
     this.room_height = room_height;
     world.rooms.add(this);
+  }
+
+  public static Room create(World world, String[] tokens) {
+    return new Room(world, tokens[1], tokens[2], Integer.parseInt(tokens[3]), Integer.parseInt(tokens[4]));
+  }
+
+  @Override
+  public String world_file_string() {
+    String[] tokens = new String[5];
+    tokens[0] = "Room";
+    tokens[1] = this.id;
+    tokens[2] = this.name;
+    tokens[3] = Integer.toString(this.room_width);
+    tokens[4] = Integer.toString(this.room_height);
+    return String.join(TTDGE.WORLD_FILE_DELIMITER, tokens);
   }
 
   @Override
@@ -40,9 +55,9 @@ public class Room extends Thing {
     return null;
   }
 
-  public boolean obstacle(int room_x, int room_y) {
+  public boolean obstacle(GameCharacter game_character, int room_x, int room_y) {
     Thing thing = this.get(room_x, room_y);
-    if (thing != null && thing.collide()) {
+    if (thing != null && thing.collide(game_character)) {
       return true;
     }
     else {
@@ -50,11 +65,13 @@ public class Room extends Thing {
     }
   }
 
-  public void set_obstacle(Obstacle obstacle, int room_x, int room_y) {
+
+  public void set_thing(Thing thing, int room_x, int room_y) {
     if (grid[room_x][room_y] == null) {
-      grid[room_x][room_y] = obstacle;
-      obstacle.room_x = room_x;
-      obstacle.room_y = room_y;
+      grid[room_x][room_y] = thing;
+      thing.room = this;
+      thing.room_x = room_x;
+      thing.room_y = room_y;
     }
     else {
       TTDGE.error("Can not set obstacle, slot taken.");
@@ -67,19 +84,14 @@ public class Room extends Thing {
   }
 
   @Override
-  public String world_file_string() {
-    String[] tokens = new String[5];
-    tokens[0] = "Room";
-    tokens[1] = this.id;
-    tokens[2] = this.name;
-    tokens[3] = Integer.toString(this.room_width);
-    tokens[4] = Integer.toString(this.room_height);
-    return String.join(TTDGE.WORLD_FILE_DELIMITER, tokens);
+  public String default_name() {
+    return "Room";
   }
 
   @Override
-  public String default_name() {
-    return "Room";
+  public void linking_actions() {
+    // TODO Auto-generated method stub
+
   }
 
 

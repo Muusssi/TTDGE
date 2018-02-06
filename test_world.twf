@@ -1,0 +1,9 @@
+# TTDGE world file. Engine version: 0.1.0.0
+World&&Maailma
+Obstacle&&Obstacle-2&&null&&Room-2&&2&&2
+GameCharacter&&GameCharacter-5&&Pelaaja&&Room-4&&232&&174&&player
+Door&&Door-2&&null&&Room-2&&1&&1&&Door-3&&false
+Room&&Room-3&&null&&3&&9
+Room&&Room-2&&null&&6&&8
+Door&&Door-3&&null&&Room-4&&1&&1&&Door-2&&false
+Room&&Room-4&&null&&10&&10

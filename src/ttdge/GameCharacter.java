@@ -13,6 +13,8 @@ public class GameCharacter extends Thing {
 
   public int radius = TTDGE.room_grid_size/3;
 
+  public Room room;
+
   public ArrayList<Item> items = new ArrayList<Item>();
 
   // For path finding
@@ -20,8 +22,56 @@ public class GameCharacter extends Thing {
   public int room_target_y = -1;
   public String path = null;
 
-  public GameCharacter(World world, String id) {
-    super(world, id, "GameCharacter");
+  public GameCharacter(World world, String id, String name) {
+    super(world, id, name);
+    if (TTDGE.player == null) {
+      TTDGE.player = this;
+    }
+  }
+
+  @Override
+  public String world_file_string() {
+    String[] tokens = new String[7];
+    tokens[0] = "GameCharacter";
+    tokens[1] = this.id;
+    tokens[2] = this.name;
+
+    if (room != null) {
+      tokens[3] = this.room.id;
+    }
+    else {
+      tokens[3] = "null";
+    }
+    tokens[4] = Integer.toString(this.x);
+    tokens[5] = Integer.toString(this.y);
+    if (TTDGE.player == this) {
+      tokens[6] = "player";
+    }
+    else {
+      tokens[6] = "null";
+    }
+
+    return String.join(TTDGE.WORLD_FILE_DELIMITER, tokens);
+  }
+
+  public static GameCharacter create(World world, String[] tokens) {
+    GameCharacter new_character = new GameCharacter(world, tokens[1], tokens[2]);
+    new_character.load_tokens = tokens;
+    return new_character;
+  }
+
+  @Override
+  public void linking_actions() {
+    String room_id = load_tokens[3];
+    if (!room_id.equals("null")) {
+      this.room = (Room)world.things.get(room_id);
+      this.x = Integer.parseInt(load_tokens[4]);
+      this.y = Integer.parseInt(load_tokens[5]);
+    }
+    if (TTDGE.player == null && load_tokens[6].equals("player")) {
+      TTDGE.player = this;
+    }
+    load_tokens = null;
   }
 
   @Override
@@ -98,7 +148,7 @@ public class GameCharacter extends Thing {
     if (new_y < 0) {
       return false;
     }
-    else if (this.room.obstacle(x/TTDGE.room_grid_size, new_y/TTDGE.room_grid_size)) {
+    else if (this.room.obstacle(this, x/TTDGE.room_grid_size, new_y/TTDGE.room_grid_size)) {
       return false;
     }
     return true;
@@ -113,7 +163,7 @@ public class GameCharacter extends Thing {
     if (new_y > this.room.room_height*TTDGE.room_grid_size) {
       return false;
     }
-    else if (this.room.obstacle(x/TTDGE.room_grid_size, new_y/TTDGE.room_grid_size)) {
+    else if (this.room.obstacle(this, x/TTDGE.room_grid_size, new_y/TTDGE.room_grid_size)) {
       return false;
     }
     return true;
@@ -128,7 +178,7 @@ public class GameCharacter extends Thing {
     if (new_x < 0) {
       return false;
     }
-    else if (this.room.obstacle(new_x/TTDGE.room_grid_size, y/TTDGE.room_grid_size)) {
+    else if (this.room.obstacle(this, new_x/TTDGE.room_grid_size, y/TTDGE.room_grid_size)) {
       return false;
     }
     return true;
@@ -143,7 +193,7 @@ public class GameCharacter extends Thing {
     if (new_x > this.room.room_width*TTDGE.room_grid_size) {
       return false;
     }
-    else if (this.room.obstacle(new_x/TTDGE.room_grid_size, y/TTDGE.room_grid_size)) {
+    else if (this.room.obstacle(this, new_x/TTDGE.room_grid_size, y/TTDGE.room_grid_size)) {
       return false;
     }
     return true;
@@ -171,7 +221,7 @@ public class GameCharacter extends Thing {
   }
 
   public void follow(GameCharacter other) {
-    // TODO
+    // TODO: follow(GameCharacter other)
   }
 
   /**
@@ -273,16 +323,30 @@ public class GameCharacter extends Thing {
     }
   }
 
+  public Thing thing_here() {
+    return this.room.get(this.x/TTDGE.room_grid_size, this.y/TTDGE.room_grid_size);
+  }
+
+  public void go_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.go(this);
+    }
+  }
+
+  public void open_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.open(this);
+    }
+  }
+
+
   @Override
   public String id_prefix() {
     return "GameCharacter";
   }
 
-  @Override
-  public String world_file_string() {
-    // TODO
-    return "";
-  }
 
   @Override
   public String default_name() {
@@ -311,5 +375,8 @@ public class GameCharacter extends Thing {
         );
     }
   }
+
+
+
 
 }

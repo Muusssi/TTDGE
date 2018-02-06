@@ -1,12 +1,13 @@
 package ttdge;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import processing.core.PApplet;
 
 public class TTDGE {
   public final static String ENGINE_VERSION = "0.1.0.0";
-  public final static String WORLD_FILE_DELIMITER = "||";
+  public final static String WORLD_FILE_DELIMITER = "&&";
 
   protected static PApplet papplet = null;
 
@@ -21,8 +22,10 @@ public class TTDGE {
 
   public static HashMap<String,World> worlds = new HashMap<String,World>();
 
+  public static LinkedList<String> messages = new LinkedList<String>();
 
-  public void start_engine(PApplet papplet) {
+
+  public static void start_engine(PApplet papplet) {
     TTDGE.papplet = papplet;
   }
 
@@ -33,6 +36,11 @@ public class TTDGE {
 
   public static void error(String message) {
     System.out.println("Error: " + message);
+  }
+
+  public static void message(String message) {
+    messages.add(message);
+    System.out.println(message);
   }
 
 
@@ -57,10 +65,11 @@ public class TTDGE {
       }
 
     }
+    new_world.link_things();
     return new_world;
   }
 
-  static void draw_active_room() {
+  public static void draw_active_room() {
     if (player != null && player.room != null) {
       player.room.draw();
     }
@@ -68,5 +77,6 @@ public class TTDGE {
       fatal_error("Unable to draw room: active room unknown!");
     }
   }
+
 
 }

@@ -31,4 +31,10 @@ public class Item extends Thing {
     return null;
   }
 
+  @Override
+  public void linking_actions() {
+    // TODO Auto-generated method stub
+
+  }
+
 }
