@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
+import processing.data.JSONObject;
+
 public class GameCharacter extends Thing {
 
   public int x = 0;
@@ -13,8 +15,6 @@ public class GameCharacter extends Thing {
 
   public int radius = TTDGE.room_grid_size/3;
 
-  public Room room;
-
   public ArrayList<Item> items = new ArrayList<Item>();
 
   // For path finding
@@ -22,56 +22,40 @@ public class GameCharacter extends Thing {
   public int room_target_y = -1;
   public String path = null;
 
-  public GameCharacter(World world, String id, String name) {
-    super(world, id, name);
+  public GameCharacter(World world, String id, String name, String description) {
+    super(world, id, name, description);
     if (TTDGE.player == null) {
       TTDGE.player = this;
     }
   }
 
   @Override
-  public String world_file_string() {
-    String[] tokens = new String[7];
-    tokens[0] = "GameCharacter";
-    tokens[1] = this.id;
-    tokens[2] = this.name;
-
-    if (room != null) {
-      tokens[3] = this.room.id;
-    }
-    else {
-      tokens[3] = "null";
-    }
-    tokens[4] = Integer.toString(this.x);
-    tokens[5] = Integer.toString(this.y);
-    if (TTDGE.player == this) {
-      tokens[6] = "player";
-    }
-    else {
-      tokens[6] = "null";
-    }
-
-    return String.join(TTDGE.WORLD_FILE_DELIMITER, tokens);
+  public JSONObject world_file_object() {
+    JSONObject json = this.base_world_file_object();
+    json.setInt("x", this.x);
+    json.setInt("y", this.y);
+    json.setBoolean("player", TTDGE.player == this);
+    return json;
   }
 
-  public static GameCharacter create(World world, String[] tokens) {
-    GameCharacter new_character = new GameCharacter(world, tokens[1], tokens[2]);
-    new_character.load_tokens = tokens;
+  public static GameCharacter create(World world, JSONObject json) {
+    String id = json.getString("id");
+    String name = json.getString("name");
+    String description = json.getString("description");
+    GameCharacter new_character = new GameCharacter(world, id, name, description);
+    new_character.json = json;
     return new_character;
   }
 
   @Override
   public void linking_actions() {
-    String room_id = load_tokens[3];
-    if (!room_id.equals("null")) {
-      this.room = (Room)world.things.get(room_id);
-      this.x = Integer.parseInt(load_tokens[4]);
-      this.y = Integer.parseInt(load_tokens[5]);
-    }
-    if (TTDGE.player == null && load_tokens[6].equals("player")) {
+    this.room = world.get_room(this.json.getString("room"));
+    this.x = json.getInt("x");
+    this.y = json.getInt("y");
+    if (TTDGE.player == null && this.json.getBoolean("player")) {
       TTDGE.player = this;
     }
-    load_tokens = null;
+    this.json = null;
   }
 
   @Override
@@ -341,9 +325,16 @@ public class GameCharacter extends Thing {
     }
   }
 
+  public void close_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.open(this);
+    }
+  }
+
 
   @Override
-  public String id_prefix() {
+  public String type_name() {
     return "GameCharacter";
   }
 
@@ -374,6 +365,13 @@ public class GameCharacter extends Thing {
           other.path_here.length() + other.estimate
         );
     }
+  }
+
+
+  @Override
+  public String default_description() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 

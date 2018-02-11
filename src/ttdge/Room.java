@@ -1,34 +1,42 @@
 package ttdge;
 
+import processing.data.JSONObject;
+
 public class Room extends Thing {
 
-  Thing[][] grid;
+  public Thing[][] grid;
 
-  int room_width;
-  int room_height;
+  public int room_width;
+  public int room_height;
+
+  public boolean visited = false;
 
 
-  public Room (World world, String id, String name, int room_width, int room_height) {
-    super(world, id, name);
+  public Room (World world, String id, String name, String description, int room_width, int room_height) {
+    super(world, id, name, description);
     grid = new Thing[room_width][room_height];
     this.room_width = room_width;
     this.room_height = room_height;
     world.rooms.add(this);
   }
 
-  public static Room create(World world, String[] tokens) {
-    return new Room(world, tokens[1], tokens[2], Integer.parseInt(tokens[3]), Integer.parseInt(tokens[4]));
+  public static Room create(World world, JSONObject json) {
+    String id = json.getString("id");
+    String name = json.getString("name");
+    String description = json.getString("description");
+    Room new_room = new Room(world, id, name, description, json.getInt("room_width"), json.getInt("room_height"));
+    new_room.visited = json.getBoolean("visited");
+    new_room.json = json;
+    return new_room;
   }
 
   @Override
-  public String world_file_string() {
-    String[] tokens = new String[5];
-    tokens[0] = "Room";
-    tokens[1] = this.id;
-    tokens[2] = this.name;
-    tokens[3] = Integer.toString(this.room_width);
-    tokens[4] = Integer.toString(this.room_height);
-    return String.join(TTDGE.WORLD_FILE_DELIMITER, tokens);
+  public JSONObject world_file_object() {
+    JSONObject json = this.base_world_file_object();
+    json.setInt("room_width", this.room_width);
+    json.setInt("room_height", this.room_height);
+    json.setBoolean("visited", this.visited);
+    return json;
   }
 
   @Override
@@ -79,7 +87,7 @@ public class Room extends Thing {
   }
 
   @Override
-  public String id_prefix() {
+  public String type_name() {
     return "Room";
   }
 
@@ -90,8 +98,12 @@ public class Room extends Thing {
 
   @Override
   public void linking_actions() {
-    // TODO Auto-generated method stub
+    this.json = null;
+  }
 
+  @Override
+  public String default_description() {
+    return "";
   }
 
 

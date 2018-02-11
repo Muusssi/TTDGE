@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+
 public class World {
 
   public static int WORLD_STRING_ELEMENTS = 2;
@@ -24,56 +27,56 @@ public class World {
     TTDGE.worlds.put(name, this);
   }
 
-  String world_file_string() {
-    String[] elements = new String[WORLD_STRING_ELEMENTS];
-    elements[0] = id_prefix();
-    elements[1] = name;
-    return String.join(TTDGE.WORLD_FILE_DELIMITER, elements);
+  public JSONObject world_file_object() {
+    JSONObject json = new JSONObject();
+    json.setString("type", "World");
+    json.setString("engine_version", TTDGE.ENGINE_VERSION);
+    json.setString("name", this.name);
+    return json;
   }
 
-  public static World create(String[] tokens) {
-    if (tokens.length != WORLD_STRING_ELEMENTS) {
-      TTDGE.fatal_error("Corrupted world file string: wrong number of elements for a world.");
-      return null;
+  public static World create(JSONObject world_json) {
+    World new_world = new World(world_json.getString("name"));
+    JSONArray things_json = world_json.getJSONArray("things");
+    for (int i = 0; i < things_json.size(); i++) {
+      JSONObject json = things_json.getJSONObject(i);
+      new_world.load_thing(json);
     }
-    else {
-      return new World(tokens[1]);
-    }
+
+    return new_world;
   }
 
   public void save(String file_name) {
-    ArrayList<String> lines = new ArrayList<String>();
-    lines.add("# TTDGE world file. Engine version: " + TTDGE.ENGINE_VERSION);
-    lines.add(this.world_file_string());
+    JSONObject world_json = world_file_object();
     Iterator<Thing> itr = things.values().iterator();
+    JSONArray things_json = new JSONArray();
     while (itr.hasNext()) {
       Thing thing = itr.next();
-      String world_file_string = thing.world_file_string();
-      //System.out.println(world_file_string);
-      lines.add(world_file_string);
+      things_json.append(thing.world_file_object());
     }
-    TTDGE.papplet.saveStrings(file_name, lines.toArray(new String[0]));
+    world_json.setJSONArray("things", things_json);
+    TTDGE.papplet.saveJSONObject(world_json, file_name);
   }
 
-  Thing load_thing(String[] tokens) {
-    String thing_type = tokens[0];
+  Thing load_thing(JSONObject json) {
+    String thing_type = json.getString("type");
     if (thing_type.equals("Room")) {
-      Room new_room = Room.create(this, tokens);
+      Room new_room = Room.create(this, json);
       rooms.add(new_room);
       return new_room;
     }
     else if (thing_type.equals("Door")) {
-      Door.create(this, tokens);
+      Door.create(this, json);
     }
     else if (thing_type.equals("Obstacle")) {
-      Obstacle.create(this, tokens);
+      Obstacle.create(this, json);
     }
     else if (thing_type.equals("GameCharacter")) {
-      GameCharacter.create(this, tokens);
+      GameCharacter.create(this, json);
     }
-    else if (thing_type.equals("Door")) {
-      Door.create(this, tokens);
-    }
+//    else if (thing_type.equals("Door")) {
+//      Door.create(this, json);
+//    }
     else if (thing_type.equals("Item")) {
       //create_item(tokens);
     }
@@ -81,6 +84,14 @@ public class World {
       TTDGE.fatal_error("World file corrupted: '"+world_file+"'. Unsupported thing: '"+thing_type+"'");
     }
     return null;
+  }
+
+  public Room get_room(String room_id) {
+    Room room = null;
+    if (room_id != null) {
+      room = (Room)things.get(room_id);
+    }
+    return room;
   }
 
   public void link_things() {

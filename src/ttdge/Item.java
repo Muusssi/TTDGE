@@ -1,9 +1,11 @@
 package ttdge;
 
+import processing.data.JSONObject;
+
 public class Item extends Thing {
 
-  public Item(World world, String id, String name) {
-    super(world, id, name);
+  public Item(World world, String id, String name, String description) {
+    super(world, id, name, description);
     // TODO Auto-generated constructor stub
   }
 
@@ -14,13 +16,13 @@ public class Item extends Thing {
   }
 
   @Override
-  public String id_prefix() {
+  public String type_name() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public String world_file_string() {
+  public JSONObject world_file_object() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -36,5 +38,12 @@ public class Item extends Thing {
     // TODO Auto-generated method stub
 
   }
+
+  @Override
+  public String default_description() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 
 }

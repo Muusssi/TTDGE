@@ -1,17 +1,20 @@
 package ttdge;
 
+import processing.data.JSONObject;
+
 public abstract class Thing {
 
   public String id;
   public World world;
-  public String name;;
+  public String name;
+  public String description;
 
   public Room room;
   public int room_x, room_y;
 
-  public String[] load_tokens = null;
+  public JSONObject json = null;
 
-  public Thing (World world, String id, String name) {
+  public Thing (World world, String id, String name, String description) {
     if (name == null || name.equals("null")) {
       this.name = this.default_name();
     }
@@ -27,13 +30,40 @@ public abstract class Thing {
     else {
       this.id = id;
     }
+    if (description == null || description.equals("null")) {
+      this.description = default_description();
+    }
+    else {
+      this.description = description;
+    }
     world.things.put(this.id, this);
 
+  }
+
+  public JSONObject base_world_file_object() {
+    JSONObject json = new JSONObject();
+    json.setString("type", this.type_name());
+    json.setString("id", this.id);
+    json.setString("name", this.name);
+    json.setString("description", this.name);
+    if (this.room != null) {
+      json.setString("room", this.room.id);
+    }
+    else {
+      json.setString("room", null);
+      System.out.println("wtf");
+    }
+    json.setInt("room_x", this.room_x);
+    json.setInt("room_y", this.room_y);
+
+    return json;
   }
 
   public void investigate() {
     TTDGE.message("This clearly is a " + this.name);
   }
+
+  public void investigate(GameCharacter game_character) {}
 
   public void go(GameCharacter game_character) {}
 
@@ -55,23 +85,20 @@ public abstract class Thing {
 
 
   protected String id() {
-    return id_prefix() + "-" + this.world.id_counter_next();
+    return type_name() + "-" + this.world.id_counter_next();
   }
 
   public abstract String default_name();
 
-  public abstract String id_prefix();
+  public abstract String default_description();
 
-  public abstract String world_file_string();
+  public abstract String type_name();
+
+  public abstract JSONObject world_file_object();
 
   public abstract void draw();
 
   public abstract void linking_actions();
-
-
-
-
-
 
 
 }

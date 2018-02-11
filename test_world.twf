@@ -1,9 +1,89 @@
-# TTDGE world file. Engine version: 0.1.0.0
-World&&Maailma
-Obstacle&&Obstacle-2&&null&&Room-2&&2&&2
-GameCharacter&&GameCharacter-5&&Pelaaja&&Room-4&&232&&174&&player
-Door&&Door-2&&null&&Room-2&&1&&1&&Door-3&&false
-Room&&Room-3&&null&&3&&9
-Room&&Room-2&&null&&6&&8
-Door&&Door-3&&null&&Room-4&&1&&1&&Door-2&&false
-Room&&Room-4&&null&&10&&10
+{
+  "name": "Maailma",
+  "things": [
+    {
+      "linked_door": "Door-7",
+      "closed": false,
+      "id": "Door-8",
+      "type": "Door",
+      "room_x": 1,
+      "room_y": 1,
+      "room": "Room-3"
+    },
+    {
+      "linked_door": "Door-8",
+      "closed": false,
+      "id": "Door-7",
+      "type": "Door",
+      "room_x": 1,
+      "room_y": 1,
+      "room": "Room-2"
+    },
+    {
+      "linked_door": "Door-10",
+      "closed": false,
+      "id": "Door-9",
+      "type": "Door",
+      "room_x": 2,
+      "room_y": 8,
+      "room": "Room-3"
+    },
+    {
+      "name": "Pelaaja",
+      "x": 182,
+      "description": "Pelaaja",
+      "y": 360,
+      "id": "GameCharacter-5",
+      "type": "GameCharacter",
+      "room_x": 0,
+      "room_y": 0,
+      "room": "Room-4",
+      "player": true
+    },
+    {
+      "id": "Obstacle-6",
+      "type": "Obstacle",
+      "room_x": 2,
+      "room_y": 2,
+      "room": "Room-2"
+    },
+    {
+      "room_width": 3,
+      "visited": false,
+      "id": "Room-3",
+      "type": "Room",
+      "room_x": 0,
+      "room_y": 0,
+      "room_height": 9
+    },
+    {
+      "linked_door": "Door-9",
+      "closed": false,
+      "id": "Door-10",
+      "type": "Door",
+      "room_x": 1,
+      "room_y": 1,
+      "room": "Room-4"
+    },
+    {
+      "room_width": 6,
+      "visited": false,
+      "id": "Room-2",
+      "type": "Room",
+      "room_x": 0,
+      "room_y": 0,
+      "room_height": 8
+    },
+    {
+      "room_width": 10,
+      "visited": false,
+      "id": "Room-4",
+      "type": "Room",
+      "room_x": 0,
+      "room_y": 0,
+      "room_height": 10
+    }
+  ],
+  "type": "World",
+  "engine_version": "0.1.0.0"
+}

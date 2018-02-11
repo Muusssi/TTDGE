@@ -22,19 +22,25 @@ public class ExampleGame extends PApplet{
     TTDGE.start_engine(this);
     world = TTDGE.load_world("test_world.twf");
 //    world = new World("Maailma");
-//    Room starting_room = new Room(world, null, null, 6, 8);
-//    new Room(world, null, null, 3, 9);
-//    new Room(world, null, null, 10, 10);
-//    GameCharacter pelaaja = new GameCharacter(world, null, "Pelaaja");
+//    Room starting_room = new Room(world, null, null, null, 6, 8);
+//    Room corridor = new Room(world, null, null, null, 3, 9);
+//    Room hall = new Room(world, null, null, null, 10, 10);
+//    GameCharacter pelaaja = new GameCharacter(world, null, "Pelaaja", null);
 //    pelaaja.room = starting_room;
-//    Obstacle obs = new Obstacle(world, null, null);
-//    TTDGE.player.room.set_obstacle(obs, 2, 2);
-//    Door door1 = new Door(world, null, null);
-//    TTDGE.player.room.set_thing(door1, 1, 1);
-//    Door door2 = new Door(world, null, null);
-//    Room r4 = (Room)world.things.get("Room-4");
-//    r4.set_thing(door2, 1, 1);
+//    Obstacle obs = new Obstacle(world, null, null, null);
+//    TTDGE.player.room.set_thing(obs, 2, 2);
+//
+//    Door door1 = new Door(world, null, null, null);
+//    starting_room.set_thing(door1, 1, 1);
+//    Door door2 = new Door(world, null, null, null);
+//    corridor.set_thing(door2, 1, 1);
 //    door1.link_to(door2);
+//
+//    Door door3 = new Door(world, null, null, null);
+//    Door door4 = new Door(world, null, null, null);
+//    door3.link_to(door4);
+//    corridor.set_thing(door3, 2, 8);
+//    hall.set_thing(door4, 1, 1);
 
   }
 
@@ -66,6 +72,9 @@ public class ExampleGame extends PApplet{
     }
     else if (keyCode == 'O') {
       TTDGE.player.open_here();
+    }
+    else if (keyCode == 'C') {
+      TTDGE.player.close_here();
     }
   }
 

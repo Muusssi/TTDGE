@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import processing.core.PApplet;
+import processing.data.JSONObject;
 
 public class TTDGE {
   public final static String ENGINE_VERSION = "0.1.0.0";
@@ -45,26 +46,8 @@ public class TTDGE {
 
 
   public static World load_world(String world_file) {
-    String[] lines = papplet.loadStrings(world_file);
-    World new_world = null;
-    for (String line : lines) {
-      if (!line.substring(0, 1).equals("#")) {
-        String[] tokens = line.split(WORLD_FILE_DELIMITER);
-        String thing_type = tokens[0];
-        if (thing_type.equals("World")) {
-          new_world = World.create(tokens);
-          new_world.world_file = world_file;
-        }
-        else {
-          if (new_world == null) {
-            fatal_error("Corrupted world file '"+world_file+"'. World not first thing.");
-            return null;
-          }
-          new_world.load_thing(tokens);
-        }
-      }
-
-    }
+    JSONObject world_json = papplet.loadJSONObject(world_file);
+    World new_world = World.create(world_json);
     new_world.link_things();
     return new_world;
   }
