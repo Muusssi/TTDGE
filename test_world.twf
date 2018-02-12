@@ -11,6 +11,13 @@
       "room": "Room-3"
     },
     {
+      "id": "Item-11",
+      "type": "Item",
+      "room_x": 5,
+      "room_y": 6,
+      "room": "Room-4"
+    },
+    {
       "linked_door": "Door-8",
       "closed": false,
       "id": "Door-7",
@@ -30,9 +37,9 @@
     },
     {
       "name": "Pelaaja",
-      "x": 182,
+      "x": 108,
       "description": "Pelaaja",
-      "y": 360,
+      "y": 302,
       "id": "GameCharacter-5",
       "type": "GameCharacter",
       "room_x": 0,

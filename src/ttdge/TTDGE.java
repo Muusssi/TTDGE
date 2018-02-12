@@ -8,8 +8,6 @@ import processing.data.JSONObject;
 
 public class TTDGE {
   public final static String ENGINE_VERSION = "0.1.0.0";
-  public final static String WORLD_FILE_DELIMITER = "&&";
-
   protected static PApplet papplet = null;
 
   public static boolean show_searched_points = false;
@@ -60,6 +58,7 @@ public class TTDGE {
       fatal_error("Unable to draw room: active room unknown!");
     }
   }
+
 
 
 }

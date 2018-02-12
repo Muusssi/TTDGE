@@ -4,18 +4,24 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
+import processing.core.PConstants;
+import processing.core.PImage;
 import processing.data.JSONObject;
 
 public class GameCharacter extends Thing {
 
   public int x = 0;
   public int y = 0;
+  public char last_direction = 's';
+  public char direction = 0;
 
   public int speed = 2;
 
   public int radius = TTDGE.room_grid_size/3;
 
   public ArrayList<Item> items = new ArrayList<Item>();
+
+  public PImage image = null;
 
   // For path finding
   public int room_target_x = -1;
@@ -27,6 +33,7 @@ public class GameCharacter extends Thing {
     if (TTDGE.player == null) {
       TTDGE.player = this;
     }
+    image = TTDGE.papplet.loadImage("smile.png");
   }
 
   @Override
@@ -60,7 +67,29 @@ public class GameCharacter extends Thing {
 
   @Override
   public void draw() {
-    TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*2, this.radius*2);
+    // TODO:
+    if (this.image == null) {
+      TTDGE.papplet.pushMatrix();
+      TTDGE.papplet.translate(this.image.width/2, this.image.height/2);
+      if (this.direction != 0) {
+        TTDGE.papplet.rotate(this.direction);
+      }
+      else {
+        TTDGE.papplet.rotate(this.last_direction);
+      }
+      //TTDGE.imageMode(PConstants.CENTER);
+      TTDGE.papplet.image(image, 0, 0);
+      TTDGE.papplet.popMatrix();
+      TTDGE.papplet.rect(0, 0, TTDGE.room_grid_size/2, TTDGE.room_grid_size/2);
+      TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*2, this.radius*2);
+      TTDGE.papplet.text(this.last_direction, 100, 100);
+
+      this.last_direction = this.direction;
+      this.direction = 0;
+    }
+    else {
+      TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*2, this.radius*2);
+    }
   }
 
   public void move(char direction) {
@@ -99,27 +128,86 @@ public class GameCharacter extends Thing {
     }
   }
 
+  public void set_direction(char direction) {
+    if (this.direction != 0) {
+      if (this.direction == 'w') {
+        if (direction == 'a') {
+          this.direction = 'q';
+        }
+        else if (direction == 'd') {
+          this.direction = 'e';
+        }
+        else {
+          this.direction = direction;
+        }
+      }
+      else if (this.direction == 'a') {
+        if (direction == 'w') {
+          this.direction = 'q';
+        }
+        else if (direction == 's') {
+          this.direction = 'z';
+        }
+        else {
+          this.direction = direction;
+        }
+      }
+      else if (this.direction == 's') {
+        if (direction == 'a') {
+          this.direction = 'z';
+        }
+        else if (direction == 'd') {
+          this.direction = 'x';
+        }
+        else {
+          this.direction = direction;
+        }
+      }
+      else if (this.direction == 'd') {
+        if (direction == 'w') {
+          this.direction = 'e';
+        }
+        else if (direction == 'x') {
+          this.direction = 's';
+        }
+        else {
+          this.direction = direction;
+        }
+      }
+      else {
+        this.direction = direction;
+      }
+    }
+    else {
+      this.direction = direction;
+    }
+  }
+
   public void move_up() {
     if (this.can_move_up()) {
       this.y -= this.speed;
+      this.set_direction('w');
     }
   }
 
   public void move_down() {
     if (this.can_move_down()) {
       this.y += this.speed;
+      this.set_direction('s');
     }
   }
 
   public void move_left() {
     if (this.can_move_left()) {
       this.x -= this.speed;
+      this.set_direction('a');
     }
   }
 
   public void move_right() {
     if (this.can_move_right()) {
       this.x += this.speed;
+      this.set_direction('d');
     }
   }
 
@@ -332,6 +420,36 @@ public class GameCharacter extends Thing {
     }
   }
 
+  public void take_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.take(this);
+    }
+  }
+
+  public void put_here() {
+    if (this.items.size() > 0) {
+      if (this.thing_here() == null) {
+        Item item = this.items.remove(0);
+        item.put(this);
+      }
+      else {
+        System.out.println("There is already an item here.");
+      }
+    }
+    else {
+      System.out.println("There is no item here.");
+    }
+  }
+
+  public int room_x() {
+    return this.x/TTDGE.room_grid_size;
+  }
+
+  public int room_y() {
+    return this.y/TTDGE.room_grid_size;
+  }
+
 
   @Override
   public String type_name() {
@@ -345,7 +463,13 @@ public class GameCharacter extends Thing {
   }
 
 
-  public class WayPoint implements Comparable<WayPoint>  {
+  @Override
+  public String default_description() {
+    // TODO:
+    return "";
+  }
+
+  public class WayPoint implements Comparable<WayPoint> {
 
     String path_here = "";
     int x, y, estimate;
@@ -367,12 +491,31 @@ public class GameCharacter extends Thing {
     }
   }
 
+  private float direction_to_angle(char direction) {
+    switch (direction) {
+    case 'w':
+      return PConstants.PI;
+    case 'a':
+      return PConstants.HALF_PI;
+    case 's':
+      return 0;
+    case 'd':
+      return -PConstants.HALF_PI;
+    case 'q':
+      return PConstants.QUARTER_PI*3;
+    case 'e':
+      return -PConstants.QUARTER_PI*3;
+    case 'z':
+      return PConstants.QUARTER_PI;
+    case 'x':
+      return -PConstants.QUARTER_PI;
+    default:
+      return 0;
 
-  @Override
-  public String default_description() {
-    // TODO Auto-generated method stub
-    return null;
+    }
   }
+
+
 
 
 

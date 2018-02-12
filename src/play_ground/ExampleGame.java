@@ -41,6 +41,9 @@ public class ExampleGame extends PApplet{
 //    door3.link_to(door4);
 //    corridor.set_thing(door3, 2, 8);
 //    hall.set_thing(door4, 1, 1);
+//
+//    Item key = new Item(world, null, null, null);
+//    hall.set_thing(key, 5, 6);
 
   }
 
@@ -59,11 +62,7 @@ public class ExampleGame extends PApplet{
 
   @Override
   public void keyPressed() {
-    if (keyCode == 'L') {
-      System.out.println("Load");
-      world = TTDGE.load_world("/Users/tommioinonen/Documents/TTDGE/test_world.twf");
-    }
-    else if (keyCode == 'S') {
+if (keyCode == 'S') {
       System.out.println("Save");
       world.save("test_world.twf");
     }
@@ -75,6 +74,12 @@ public class ExampleGame extends PApplet{
     }
     else if (keyCode == 'C') {
       TTDGE.player.close_here();
+    }
+    else if (keyCode == 'T') {
+      TTDGE.player.take_here();
+    }
+    else if (keyCode == 'P') {
+      TTDGE.player.put_here();
     }
   }
 

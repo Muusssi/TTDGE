@@ -78,7 +78,7 @@ public class World {
 //      Door.create(this, json);
 //    }
     else if (thing_type.equals("Item")) {
-      //create_item(tokens);
+      Item.create(this, json);
     }
     else {
       TTDGE.fatal_error("World file corrupted: '"+world_file+"'. Unsupported thing: '"+thing_type+"'");

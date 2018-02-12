@@ -24,7 +24,7 @@ public abstract class Thing {
     this.name = name;
     this.world = world;
 
-    if (id == null || id.equals("null")) {
+    if (id == null || id.equals("")) {
       this.id = id();
     }
     else {
@@ -49,10 +49,6 @@ public abstract class Thing {
     if (this.room != null) {
       json.setString("room", this.room.id);
     }
-    else {
-      json.setString("room", null);
-      System.out.println("wtf");
-    }
     json.setInt("room_x", this.room_x);
     json.setInt("room_y", this.room_y);
 
@@ -76,6 +72,8 @@ public abstract class Thing {
   public void close(GameCharacter game_character) {}
 
   public void take(GameCharacter game_character) {}
+
+  public void put(GameCharacter game_character) {}
 
   public void operate(GameCharacter game_character) {}
 
