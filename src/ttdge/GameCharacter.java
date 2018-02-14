@@ -15,7 +15,7 @@ public class GameCharacter extends Thing {
   public char last_direction = 's';
   public char direction = 0;
 
-  public int speed = 2;
+  public int speed = 3;
 
   public int radius = TTDGE.room_grid_size/3;
 
@@ -33,7 +33,7 @@ public class GameCharacter extends Thing {
     if (TTDGE.player == null) {
       TTDGE.player = this;
     }
-    image = TTDGE.papplet.loadImage("smile.png");
+    image = TTDGE.papplet.loadImage("TTDGE1.png");
   }
 
   @Override
@@ -41,6 +41,8 @@ public class GameCharacter extends Thing {
     JSONObject json = this.base_world_file_object();
     json.setInt("x", this.x);
     json.setInt("y", this.y);
+    json.setInt("speed", this.speed);
+    json.setInt("last_direction", this.last_direction);
     json.setBoolean("player", TTDGE.player == this);
     return json;
   }
@@ -50,6 +52,10 @@ public class GameCharacter extends Thing {
     String name = json.getString("name");
     String description = json.getString("description");
     GameCharacter new_character = new GameCharacter(world, id, name, description);
+    new_character.speed = json.getInt("speed");
+    new_character.last_direction = (char)json.getInt("last_direction");
+    new_character.x = (json.getInt("x")/new_character.speed)*new_character.speed;
+    new_character.y = (json.getInt("y")/new_character.speed)*new_character.speed;
     new_character.json = json;
     return new_character;
   }
@@ -57,8 +63,6 @@ public class GameCharacter extends Thing {
   @Override
   public void linking_actions() {
     this.room = world.get_room(this.json.getString("room"));
-    this.x = json.getInt("x");
-    this.y = json.getInt("y");
     if (TTDGE.player == null && this.json.getBoolean("player")) {
       TTDGE.player = this;
     }
@@ -67,29 +71,25 @@ public class GameCharacter extends Thing {
 
   @Override
   public void draw() {
-    // TODO:
-    if (this.image == null) {
+    if (this.image != null) {
       TTDGE.papplet.pushMatrix();
-      TTDGE.papplet.translate(this.image.width/2, this.image.height/2);
+      TTDGE.papplet.translate(this.x + TTDGE.x_offset, this.y + TTDGE.y_offset);
       if (this.direction != 0) {
-        TTDGE.papplet.rotate(this.direction);
+        TTDGE.papplet.rotate(this.direction_to_angle(this.direction));
       }
       else {
-        TTDGE.papplet.rotate(this.last_direction);
+        TTDGE.papplet.rotate(this.direction_to_angle(this.last_direction));
       }
-      //TTDGE.imageMode(PConstants.CENTER);
-      TTDGE.papplet.image(image, 0, 0);
+      TTDGE.papplet.image(image, -this.image.width/2, -this.image.height/2);
       TTDGE.papplet.popMatrix();
-      TTDGE.papplet.rect(0, 0, TTDGE.room_grid_size/2, TTDGE.room_grid_size/2);
-      TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*2, this.radius*2);
-      TTDGE.papplet.text(this.last_direction, 100, 100);
-
-      this.last_direction = this.direction;
-      this.direction = 0;
     }
     else {
       TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*2, this.radius*2);
     }
+    if (this.direction != 0) {
+      this.last_direction = this.direction;
+    }
+    this.direction = 0;
   }
 
   public void move(char direction) {
@@ -395,8 +395,14 @@ public class GameCharacter extends Thing {
     }
   }
 
+  public void set_to(Room room, int room_x, int room_y) {
+    this.room = room;
+    this.x = (((int)((room_x + 0.5)*TTDGE.room_grid_size))/this.speed)*this.speed;
+    this.y = (((int)((room_y + 0.5)*TTDGE.room_grid_size))/this.speed)*this.speed;
+  }
+
   public Thing thing_here() {
-    return this.room.get(this.x/TTDGE.room_grid_size, this.y/TTDGE.room_grid_size);
+    return this.room.get(this.room_x(), this.room_y());
   }
 
   public void go_here() {

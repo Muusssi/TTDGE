@@ -59,7 +59,6 @@ public class Item extends Thing {
 
   @Override
   public void put(GameCharacter game_character) {
-    game_character.items.remove(0);
     game_character.room.set_thing(this, game_character.room_x(), game_character.room_y());;
   }
 

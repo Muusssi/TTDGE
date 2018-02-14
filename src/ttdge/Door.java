@@ -62,9 +62,7 @@ public class Door extends Thing {
         TTDGE.message("This door closed!");
       }
       else {
-        game_character.room = this.linked_door.room;
-        game_character.x = this.linked_door.room_x*TTDGE.room_grid_size;
-        game_character.y = this.linked_door.room_y*TTDGE.room_grid_size;
+        game_character.set_to(this.linked_door.room, this.linked_door.room_x, this.linked_door.room_y);
       }
     }
     else {

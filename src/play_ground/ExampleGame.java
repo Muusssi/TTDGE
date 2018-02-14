@@ -1,6 +1,7 @@
 package play_ground;
 
 import processing.core.PApplet;
+import ttdge.Item;
 import ttdge.TTDGE;
 import ttdge.World;
 
@@ -20,6 +21,7 @@ public class ExampleGame extends PApplet{
   @Override
   public void setup(){
     TTDGE.start_engine(this);
+
     world = TTDGE.load_world("test_world.twf");
 //    world = new World("Maailma");
 //    Room starting_room = new Room(world, null, null, null, 6, 8);
@@ -62,7 +64,7 @@ public class ExampleGame extends PApplet{
 
   @Override
   public void keyPressed() {
-if (keyCode == 'S') {
+    if (keyCode == 'S') {
       System.out.println("Save");
       world.save("test_world.twf");
     }
@@ -80,6 +82,10 @@ if (keyCode == 'S') {
     }
     else if (keyCode == 'P') {
       TTDGE.player.put_here();
+    }
+    else if (keyCode == 'N') {
+      Item item = new Item(world, null, null, null);
+      item.put(TTDGE.player);
     }
   }
 

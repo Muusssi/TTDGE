@@ -36,15 +36,17 @@
       "room": "Room-3"
     },
     {
+      "last_direction": 100,
       "name": "Pelaaja",
-      "x": 108,
+      "x": 243,
       "description": "Pelaaja",
-      "y": 302,
+      "y": 108,
       "id": "GameCharacter-5",
       "type": "GameCharacter",
       "room_x": 0,
       "room_y": 0,
-      "room": "Room-4",
+      "room": "Room-2",
+      "speed": 3,
       "player": true
     },
     {
