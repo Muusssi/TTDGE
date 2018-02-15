@@ -1,1 +1,6 @@
-/bin/
+bin/*
+tmp/*
+library/TTDGE/src/*
+.classpath
+.project
+
