@@ -1,6 +1,8 @@
 package ttdge;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import processing.core.PApplet;
@@ -57,6 +59,46 @@ public class TTDGE {
     else {
       fatal_error("Unable to draw room: active room unknown!");
     }
+  }
+
+  // UI Helpers
+  public static ArrayList<Button> buttons = new ArrayList<Button>();
+  public static HashMap<Integer, Boolean> pressed_keys = new HashMap<Integer, Boolean>();
+
+  // Key follower
+  public static boolean is_key_pressed(int key) {
+      if (pressed_keys.containsKey(key) ) {
+          return pressed_keys.get(key);
+      }
+      return false;
+  }
+
+  public static void notice_key_press() {
+    pressed_keys.put(TTDGE.papplet.keyCode, true);
+    pressed_keys.put((int)TTDGE.papplet.key, true);
+
+  }
+
+  public static void notice_key_release() {
+    pressed_keys.put(TTDGE.papplet.keyCode, false);
+    pressed_keys.put((int)TTDGE.papplet.key, false);
+  }
+
+  public static void notice_mouse_press() {
+      Iterator<Button> itr = buttons.iterator();
+      while (itr.hasNext()) {
+        Button painike = itr.next();
+          if (painike.cursor_points()) {
+              painike.press();
+          }
+      }
+  }
+
+  public static void draw_buttons() {
+      Iterator<Button> itr = buttons.iterator();
+      while (itr.hasNext()) {
+          itr.next().piirra();
+      }
   }
 
 

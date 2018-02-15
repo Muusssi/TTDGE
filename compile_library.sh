@@ -7,7 +7,7 @@ mkdir -p tmp
 javac src/ttdge/*.java -d tmp/ -cp core.jar
 cd tmp
 # Collect to jar
-jar cvf ../library/TTDGE/library/ttdge.jar ttdge/*.class
+jar cf ../library/TTDGE/library/ttdge.jar ttdge/*.class
 cd ..
 # Remove tmp folder
 rm -r tmp
@@ -15,5 +15,6 @@ rm -r tmp
 mkdir -p library/TTDGE/src
 cp src/ttdge/*.java library/TTDGE/src/
 # Archive the library
-zip -r library/TTDGE.zip library/TTDGE
+rm library/TTDGE.zip
+zip -r --exclude=*.DS_Store* library/TTDGE.zip library/TTDGE
 
