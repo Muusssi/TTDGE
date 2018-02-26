@@ -1,6 +1,5 @@
 package ttdge;
 
-import processing.data.JSONObject;
 
 public class Item extends Thing {
 
@@ -11,10 +10,13 @@ public class Item extends Thing {
   @Override
   public void draw() {
     TTDGE.papplet.pushStyle();
-    TTDGE.papplet.fill(0);
-    TTDGE.papplet.rect(TTDGE.x_offset + (room_x+0.5f)*TTDGE.room_grid_size, TTDGE.y_offset + (room_y+0.5f)*TTDGE.room_grid_size, TTDGE.room_grid_size/2, TTDGE.room_grid_size/2);
+    if (this.highlight) {
+      TTDGE.papplet.stroke(255, 0, 0);
+      TTDGE.papplet.strokeWeight(3);
+    }
+    TTDGE.papplet.fill(255, 255, 0);
+    TTDGE.papplet.rect(TTDGE.x_offset + (room_x+0.25f)*TTDGE.room_grid_size, TTDGE.y_offset + (room_y+0.25f)*TTDGE.room_grid_size, TTDGE.room_grid_size/2, TTDGE.room_grid_size/2);
     TTDGE.papplet.popStyle();
-
   }
 
   @Override
@@ -23,12 +25,12 @@ public class Item extends Thing {
   }
 
   @Override
-  public JSONObject world_file_object() {
-    JSONObject json = this.base_world_file_object();
+  public JSON world_file_object() {
+    JSON json = this.base_world_file_object();
     return json;
   }
 
-  public static Item create(World world, JSONObject json) {
+  public static Item create(World world, JSON json) {
     String id = json.getString("id");
     String name = json.getString("name");
     String description = json.getString("description");

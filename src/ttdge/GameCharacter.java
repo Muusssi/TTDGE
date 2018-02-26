@@ -1,14 +1,16 @@
 package ttdge;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
 import processing.core.PConstants;
 import processing.core.PImage;
-import processing.data.JSONObject;
 
 public class GameCharacter extends Thing {
+
+  public static ArrayList<GameCharacter> game_characters = new ArrayList<GameCharacter>();
 
   public int x = 0;
   public int y = 0;
@@ -28,30 +30,50 @@ public class GameCharacter extends Thing {
   public int room_target_y = -1;
   public String path = null;
 
-  public GameCharacter(World world, String id, String name, String description) {
+  public GameCharacter(World world, String id, String name, String description, PImage image) {
     super(world, id, name, description);
+    if (image == null) {
+      try {
+        URL fileUrl = getClass().getResource(this.default_image_file_name());
+        System.out.println(fileUrl.getFile());
+        this.image = TTDGE.papplet.loadImage(fileUrl.getFile());
+        //BufferedImage b_image = ImageIO.read(Applet.class.getResourceAsStream(fileUrl.getFile()));
+        //this.image = new PImage(b_image);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
     if (TTDGE.player == null) {
       TTDGE.player = this;
     }
-    image = TTDGE.papplet.loadImage("TTDGE1.png");
+
+
+    game_characters.add(this);
   }
 
   @Override
-  public JSONObject world_file_object() {
-    JSONObject json = this.base_world_file_object();
-    json.setInt("x", this.x);
-    json.setInt("y", this.y);
-    json.setInt("speed", this.speed);
-    json.setInt("last_direction", this.last_direction);
-    json.setBoolean("player", TTDGE.player == this);
+  public JSON world_file_object() {
+    JSON json = this.base_world_file_object();
+    json.set("x", this.x);
+    json.set("y", this.y);
+    json.set("speed", this.speed);
+    json.set("last_direction", this.last_direction);
+    json.set("player", TTDGE.player == this);
     return json;
   }
 
-  public static GameCharacter create(World world, JSONObject json) {
+  public static GameCharacter create(World world, JSON json) {
     String id = json.getString("id");
     String name = json.getString("name");
     String description = json.getString("description");
-    GameCharacter new_character = new GameCharacter(world, id, name, description);
+    //System.out.println(GameCharacter.image_file_name());
+    //String file_name = json.getString("image");
+    //GameCharacter.image_file_name()
+    //System.out.println(file_name);
+    //PImage image =  TTDGE.papplet.loadImage(file_name);
+    GameCharacter new_character = new GameCharacter(world, id, name, description, null);
+    //new_character.image_file_name = file_name;
     new_character.speed = json.getInt("speed");
     new_character.last_direction = (char)json.getInt("last_direction");
     new_character.x = (json.getInt("x")/new_character.speed)*new_character.speed;
@@ -82,6 +104,15 @@ public class GameCharacter extends Thing {
       }
       TTDGE.papplet.image(image, -this.image.width/2, -this.image.height/2);
       TTDGE.papplet.popMatrix();
+
+      if (this.highlight) {
+        TTDGE.papplet.pushStyle();
+        TTDGE.papplet.stroke(255, 0, 0);
+        TTDGE.papplet.strokeWeight(3);
+        TTDGE.papplet.noFill();
+        TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*4, this.radius*4);
+        TTDGE.papplet.popStyle();
+      }
     }
     else {
       TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*2, this.radius*2);
@@ -90,6 +121,13 @@ public class GameCharacter extends Thing {
       this.last_direction = this.direction;
     }
     this.direction = 0;
+  }
+
+  public boolean room_coords_point_to(int x, int y) {
+    if (Math.abs(this.x - x) < this.radius && Math.abs(this.y - y) < this.radius) {
+      return true;
+    }
+    return false;
   }
 
   public void move(char direction) {
@@ -405,35 +443,35 @@ public class GameCharacter extends Thing {
     return this.room.get(this.room_x(), this.room_y());
   }
 
-  public void go_here() {
+  public void go_thing_here() {
     Thing thing = thing_here();
     if (thing != null) {
       thing.go(this);
     }
   }
 
-  public void open_here() {
+  public void open_thing_here() {
     Thing thing = thing_here();
     if (thing != null) {
       thing.open(this);
     }
   }
 
-  public void close_here() {
+  public void close_thing_here() {
     Thing thing = thing_here();
     if (thing != null) {
       thing.open(this);
     }
   }
 
-  public void take_here() {
+  public void take_thing_here() {
     Thing thing = thing_here();
     if (thing != null) {
       thing.take(this);
     }
   }
 
-  public void put_here() {
+  public void put_thing_here() {
     if (this.items.size() > 0) {
       if (this.thing_here() == null) {
         Item item = this.items.remove(0);
@@ -466,6 +504,15 @@ public class GameCharacter extends Thing {
   @Override
   public String default_name() {
     return "GameCharacter";
+  }
+
+  public static String image_file_name() {
+    return "TTDGE1.png";
+  }
+
+  @Override
+  public String default_image_file_name() {
+    return GameCharacter.image_file_name();
   }
 
 

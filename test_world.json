@@ -40,7 +40,7 @@
       "name": "Pelaaja",
       "x": 75,
       "description": "Pelaaja",
-      "y": 75,
+      "y": 222,
       "id": "GameCharacter-5",
       "type": "GameCharacter",
       "room_x": 0,
@@ -57,8 +57,6 @@
       "room": "Room-2"
     },
     {
-      "world_map_x": 92,
-      "world_map_y": 2,
       "room_width": 3,
       "visited": true,
       "id": "Room-3",
@@ -77,8 +75,8 @@
       "room": "Room-4"
     },
     {
-      "world_map_x": 74,
-      "world_map_y": 41,
+      "world_map_x": 85,
+      "world_map_y": 19,
       "room_width": 6,
       "visited": false,
       "id": "Room-2",
@@ -88,8 +86,8 @@
       "room_height": 8
     },
     {
-      "world_map_x": 97,
-      "world_map_y": 3,
+      "world_map_x": 54,
+      "world_map_y": 16,
       "room_width": 10,
       "visited": false,
       "id": "Room-4",

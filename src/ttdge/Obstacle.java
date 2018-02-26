@@ -1,6 +1,5 @@
 package ttdge;
 
-import processing.data.JSONObject;
 
 public class Obstacle extends Thing {
 
@@ -12,7 +11,7 @@ public class Obstacle extends Thing {
     super(world, id, name, description);
   }
 
-  public static Obstacle create(World world, JSONObject json) {
+  public static Obstacle create(World world, JSON json) {
     String id = json.getString("id");
     String name = json.getString("name");
     String description = json.getString("description");
@@ -22,8 +21,8 @@ public class Obstacle extends Thing {
   }
 
   @Override
-  public JSONObject world_file_object() {
-    JSONObject json = this.base_world_file_object();
+  public JSON world_file_object() {
+    JSON json = this.base_world_file_object();
     return json;
   }
 
@@ -42,6 +41,10 @@ public class Obstacle extends Thing {
   public void draw() {
     TTDGE.papplet.pushStyle();
     TTDGE.papplet.fill(0);
+    if (this.highlight) {
+      TTDGE.papplet.stroke(255, 0, 0);
+      TTDGE.papplet.strokeWeight(3);
+    }
     TTDGE.papplet.rect(TTDGE.x_offset + room_x*TTDGE.room_grid_size, TTDGE.y_offset + room_y*TTDGE.room_grid_size, TTDGE.room_grid_size, TTDGE.room_grid_size);
     TTDGE.papplet.popStyle();
   }

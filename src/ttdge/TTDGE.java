@@ -6,20 +6,26 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import processing.core.PApplet;
-import processing.data.JSONObject;
 
 public class TTDGE {
   public final static String ENGINE_VERSION = "0.1.0.0";
   protected static PApplet papplet = null;
 
   public static boolean show_searched_points = false;
+  public static boolean debug_mode = false;
 
   public static int room_grid_size = 50;
 
   public static int x_offset = 50;
   public static int y_offset = 50;
 
+  public static int map_grid_size = 5;
+
+  public static int x_map_offset = 50;
+  public static int y_map_offset = 50;
+
   public static GameCharacter player;
+  public static Room active_room = null;
 
   public static HashMap<String,World> worlds = new HashMap<String,World>();
 
@@ -46,14 +52,17 @@ public class TTDGE {
 
 
   public static World load_world(String world_file) {
-    JSONObject world_json = papplet.loadJSONObject(world_file);
+    JSON world_json = new JSON(papplet.loadJSONObject(world_file));
     World new_world = World.create(world_json);
     new_world.link_things();
     return new_world;
   }
 
   public static void draw_active_room() {
-    if (player != null && player.room != null) {
+    if (active_room != null) {
+      active_room.draw();
+    }
+    else if (player != null && player.room != null) {
       player.room.draw();
     }
     else {
@@ -76,7 +85,6 @@ public class TTDGE {
   public static void notice_key_press() {
     pressed_keys.put(TTDGE.papplet.keyCode, true);
     pressed_keys.put((int)TTDGE.papplet.key, true);
-
   }
 
   public static void notice_key_release() {

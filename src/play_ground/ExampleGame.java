@@ -22,7 +22,7 @@ public class ExampleGame extends PApplet{
   public void setup(){
     TTDGE.start_engine(this);
 
-    world = TTDGE.load_world("test_world.twf");
+    world = TTDGE.load_world("test_world.json");
 //    world = new World("Maailma");
 //    Room starting_room = new Room(world, null, null, null, 6, 8);
 //    Room corridor = new Room(world, null, null, null, 3, 9);
@@ -66,22 +66,22 @@ public class ExampleGame extends PApplet{
   public void keyPressed() {
     if (keyCode == 'S') {
       System.out.println("Save");
-      world.save("test_world.twf");
+      world.save("test_world.json");
     }
     else if (keyCode == 'G') {
-      TTDGE.player.go_here();
+      TTDGE.player.go_thing_here();
     }
     else if (keyCode == 'O') {
-      TTDGE.player.open_here();
+      TTDGE.player.open_thing_here();
     }
     else if (keyCode == 'C') {
-      TTDGE.player.close_here();
+      TTDGE.player.close_thing_here();
     }
     else if (keyCode == 'T') {
-      TTDGE.player.take_here();
+      TTDGE.player.take_thing_here();
     }
     else if (keyCode == 'P') {
-      TTDGE.player.put_here();
+      TTDGE.player.put_thing_here();
     }
     else if (keyCode == 'N') {
       Item item = new Item(world, null, null, null);

@@ -1,6 +1,5 @@
 package ttdge;
 
-import processing.data.JSONObject;
 
 public class Door extends Thing {
 
@@ -12,22 +11,16 @@ public class Door extends Thing {
   }
 
   @Override
-  public JSONObject world_file_object() {
-    JSONObject json = this.base_world_file_object();
-    json.setInt("room_x", this.room_x);
-    json.setInt("room_y", this.room_y);
-    if (this.linked_door != null) {
-      json.setString("linked_door", this.linked_door.id);
-    }
-    else {
-      json.setString("linked_door", null);
-    }
-    json.setBoolean("closed", this.closed);
-
+  public JSON world_file_object() {
+    JSON json = this.base_world_file_object();
+    json.set("room_x", this.room_x);
+    json.set("room_y", this.room_y);
+    json.set("linked_door", this.linked_door);
+    json.set("closed", this.closed);
     return json;
   }
 
-  public static Door create(World world, JSONObject json) {
+  public static Door create(World world, JSON json) {
     Door new_door = new Door(world, json.getString("id"), json.getString("name"), json.getString("description"));
     new_door.closed = json.getBoolean("closed");
     new_door.json = json;
@@ -63,6 +56,7 @@ public class Door extends Thing {
       }
       else {
         game_character.set_to(this.linked_door.room, this.linked_door.room_x, this.linked_door.room_y);
+        this.linked_door.room.visited = true;
       }
     }
     else {
@@ -101,7 +95,11 @@ public class Door extends Thing {
   @Override
   public void draw() {
     TTDGE.papplet.pushStyle();
-    TTDGE.papplet.fill(250);
+    TTDGE.papplet.fill(102, 51, 0);
+    if (this.highlight) {
+      TTDGE.papplet.stroke(255, 0, 0);
+      TTDGE.papplet.strokeWeight(3);
+    }
     TTDGE.papplet.rect(TTDGE.x_offset + room_x*TTDGE.room_grid_size, TTDGE.y_offset + room_y*TTDGE.room_grid_size, TTDGE.room_grid_size, TTDGE.room_grid_size);
     TTDGE.papplet.popStyle();
   }

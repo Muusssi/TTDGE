@@ -4,12 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import processing.data.JSONArray;
-import processing.data.JSONObject;
-
 public class World {
-
-  public static int WORLD_STRING_ELEMENTS = 2;
 
   public String name;
   public String world_file = null;
@@ -27,19 +22,19 @@ public class World {
     TTDGE.worlds.put(name, this);
   }
 
-  public JSONObject world_file_object() {
-    JSONObject json = new JSONObject();
-    json.setString("type", "World");
-    json.setString("engine_version", TTDGE.ENGINE_VERSION);
-    json.setString("name", this.name);
+  public JSON world_file_object() {
+    JSON json = new JSON();
+    json.set("type", "World");
+    json.set("engine_version", TTDGE.ENGINE_VERSION);
+    json.set("name", this.name);
     return json;
   }
 
-  public static World create(JSONObject world_json) {
+  public static World create(JSON world_json) {
     World new_world = new World(world_json.getString("name"));
-    JSONArray things_json = world_json.getJSONArray("things");
-    for (int i = 0; i < things_json.size(); i++) {
-      JSONObject json = things_json.getJSONObject(i);
+    JSONarray things_json = world_json.getArray("things");
+    for (int i = 0; i < things_json.array.size(); i++) {
+      JSON json = things_json.get(i);
       new_world.load_thing(json);
     }
 
@@ -47,18 +42,18 @@ public class World {
   }
 
   public void save(String file_name) {
-    JSONObject world_json = world_file_object();
+    JSON world_json = world_file_object();
     Iterator<Thing> itr = things.values().iterator();
-    JSONArray things_json = new JSONArray();
+    JSONarray things_json = new JSONarray();
     while (itr.hasNext()) {
       Thing thing = itr.next();
       things_json.append(thing.world_file_object());
     }
-    world_json.setJSONArray("things", things_json);
-    TTDGE.papplet.saveJSONObject(world_json, file_name);
+    world_json.set("things", things_json);
+    TTDGE.papplet.saveJSONObject(world_json.json, file_name);
   }
 
-  Thing load_thing(JSONObject json) {
+  Thing load_thing(JSON json) {
     String thing_type = json.getString("type");
     if (thing_type.equals("Room")) {
       Room new_room = Room.create(this, json);
@@ -74,14 +69,33 @@ public class World {
     else if (thing_type.equals("GameCharacter")) {
       GameCharacter.create(this, json);
     }
-//    else if (thing_type.equals("Door")) {
-//      Door.create(this, json);
-//    }
     else if (thing_type.equals("Item")) {
       Item.create(this, json);
     }
     else {
       TTDGE.fatal_error("World file corrupted: '"+world_file+"'. Unsupported thing: '"+thing_type+"'");
+    }
+    return null;
+  }
+
+  public void draw_map() {
+    Iterator<Room> itr = rooms.iterator();
+    while (itr.hasNext()) {
+      itr.next().draw_on_map();
+      // TODO: door link lines
+    }
+  }
+
+  public Room pointed_thing_on_map() {
+    Iterator<Room> itr = this.rooms.iterator();
+    while (itr.hasNext()) {
+      Room room = itr.next();
+      if (TTDGE.papplet.mouseX - TTDGE.x_map_offset > room.world_map_x*TTDGE.map_grid_size
+        && TTDGE.papplet.mouseX - TTDGE.x_map_offset < room.world_map_x*TTDGE.map_grid_size + room.room_width*TTDGE.map_grid_size
+        && TTDGE.papplet.mouseY - TTDGE.y_map_offset > room.world_map_y*TTDGE.map_grid_size
+        && TTDGE.papplet.mouseY - TTDGE.y_map_offset < room.world_map_y*TTDGE.map_grid_size + room.room_height*TTDGE.map_grid_size) {
+        return room;
+      }
     }
     return null;
   }

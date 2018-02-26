@@ -74,7 +74,7 @@ public abstract class Button {
 
       TTDGE.papplet.textAlign(PConstants.CENTER, PConstants.CENTER);
       TTDGE.papplet.text(text, x + width/2, y + height/2);
-      TTDGE.papplet.pushStyle();
+      TTDGE.papplet.popStyle();
   }
 
   public void tausta_vari(int r, int g, int b) {
