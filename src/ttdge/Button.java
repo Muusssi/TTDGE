@@ -2,7 +2,7 @@ package ttdge;
 
 import processing.core.PConstants;
 
-public abstract class Button {
+public abstract class Button extends TUIelement {
 
   public int x, y;
   public int width;
@@ -47,8 +47,8 @@ public abstract class Button {
       }
   }
 
-  public void piirra() {
-    TTDGE.papplet.pushStyle();
+  public void draw() {
+      TTDGE.papplet.pushStyle();
       if (pressed || cursor_points()){
           if (pressed || TTDGE.papplet.mousePressed) {
             TTDGE.papplet.fill(text_r, text_g, text_b);
@@ -77,47 +77,57 @@ public abstract class Button {
       TTDGE.papplet.popStyle();
   }
 
-  public void tausta_vari(int r, int g, int b) {
+  public void background_color(int r, int g, int b) {
       this.background_r = r;
       this.background_g = g;
       this.background_b = b;
   }
 
-  public void tausta_vari(int c) {
-      tausta_vari(c, c, c);
+  public void background_color(int c) {
+    background_color(c, c, c);
   }
 
-  public void aktiivinen_tausta_vari(int r, int g, int b) {
+  public void active_background_color(int r, int g, int b) {
       this.active_background_r = r;
       this.active_background_g = g;
       this.active_background_b = b;
   }
 
   public void aktiivinen_tausta_vari(int c) {
-      aktiivinen_tausta_vari(c, c, c);
+    active_background_color(c, c, c);
   }
 
-  public void teksti_vari(int r, int g, int b) {
+  public void text_color(int r, int g, int b) {
       this.text_r = r;
       this.text_g = g;
       this.text_b = b;
   }
 
-  public void teksti_vari(int c) {
-      teksti_vari(c, c, c);
+  public void text_color(int c) {
+    text_color(c, c, c);
   }
 
   public void press() {
       if (stay_down) {
-          if (pressed) pressed = false;
-          else pressed = true;
+        if (pressed) {
+          pressed = false;
+          release_action();
+        }
+        else {
+          pressed = true;
+          action();
+        }
       }
-      action();
+      else {
+        action();
+      }
   }
 
   /**
    * This is the method that should be implemented
    */
   public abstract void action();
+
+  public void release_action() {}
 
 }

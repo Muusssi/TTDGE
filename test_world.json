@@ -36,17 +36,18 @@
       "room": "Room-3"
     },
     {
-      "last_direction": 115,
-      "name": "Pelaaja",
-      "x": 75,
+      "image": "/images/TTDGE1.png",
       "description": "Pelaaja",
-      "y": 222,
-      "id": "GameCharacter-5",
       "type": "GameCharacter",
       "room_x": 0,
       "room_y": 0,
-      "room": "Room-3",
+      "room": "Room-4",
       "speed": 3,
+      "last_direction": 115,
+      "name": "Pelaaja",
+      "x": 186,
+      "y": 297,
+      "id": "GameCharacter-5",
       "player": true
     },
     {
@@ -57,6 +58,23 @@
       "room": "Room-2"
     },
     {
+      "image": "TTDGE2.png",
+      "description": "Toinen hahmo",
+      "type": "GameCharacter",
+      "room_x": 0,
+      "room_y": 0,
+      "room": "Room-3",
+      "speed": 3,
+      "last_direction": 115,
+      "name": "Toinen hahmo",
+      "x": 99,
+      "y": 99,
+      "id": "GameCharacter-2",
+      "player": false
+    },
+    {
+      "world_map_x": 20,
+      "world_map_y": 45,
       "room_width": 3,
       "visited": true,
       "id": "Room-3",
@@ -89,7 +107,7 @@
       "world_map_x": 54,
       "world_map_y": 16,
       "room_width": 10,
-      "visited": false,
+      "visited": true,
       "id": "Room-4",
       "type": "Room",
       "room_x": 0,

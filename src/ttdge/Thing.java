@@ -1,5 +1,13 @@
 package ttdge;
 
+import java.awt.image.BufferedImage;
+import java.net.JarURLConnection;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
+
+import processing.core.PImage;
+
 
 public abstract class Thing {
 
@@ -9,6 +17,7 @@ public abstract class Thing {
   public String description;
 
   public String image_file_name;
+  public PImage image = null;
 
   public Room room;
   public int room_x, room_y;
@@ -52,11 +61,34 @@ public abstract class Thing {
     json.set("room", this.room);
     json.set("room_x", this.room_x);
     json.set("room_y", this.room_y);
+    json.set("image", this.image_file_name);
     return json;
   }
 
   public void investigate() {
     TTDGE.message("This clearly is a " + this.name);
+  }
+
+  public void set_image(String file_name) {
+    if (file_name == null) {
+      file_name = this.default_image_file_name();
+    }
+    this.image_file_name = file_name;
+    try {
+      URL imageurl = getClass().getResource(file_name);
+      String image_path = imageurl.getPath();
+      if (image_path.contains("TTDGE.jar!")) {
+        imageurl = new URL("jar:" + image_path);
+        JarURLConnection jarConnection = (JarURLConnection)imageurl.openConnection();
+        BufferedImage b_image = ImageIO.read(jarConnection.getInputStream());
+        this.image = new PImage(b_image);
+      }
+      else {
+        this.image = TTDGE.papplet.loadImage(image_path);
+      }
+    } catch (Exception e) {
+      this.image = TTDGE.papplet.loadImage(file_name);
+    }
   }
 
   public void investigate(GameCharacter game_character) {}
@@ -87,7 +119,11 @@ public abstract class Thing {
 
 
   protected String id() {
-    return type_name() + "-" + this.world.id_counter_next();
+    String new_id = type_name() + "-" + this.world.id_counter_next();
+    while (this.world.things.containsKey(new_id)) {
+      new_id = type_name() + "-" + this.world.id_counter_next();
+    }
+    return new_id;
   }
 
   public abstract String default_name();
@@ -101,6 +137,8 @@ public abstract class Thing {
   public abstract void draw();
 
   public abstract void linking_actions();
+
+  public abstract void destroy();
 
 
 }

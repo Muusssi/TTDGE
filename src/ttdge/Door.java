@@ -43,9 +43,23 @@ public class Door extends Thing {
     json = null;
   }
 
+  @Override
+  public void destroy() {
+    this.unlink();
+    world.things.remove(this.id);
+    this.world = null;
+  }
+
   public void link_to(Door other_door) {
     this.linked_door = other_door;
     other_door.linked_door = this;
+  }
+
+  public void unlink() {
+    if (this.linked_door != null) {
+      this.linked_door.linked_door = null;
+      this.linked_door = null;
+    }
   }
 
   @Override
@@ -56,6 +70,9 @@ public class Door extends Thing {
       }
       else {
         game_character.set_to(this.linked_door.room, this.linked_door.room_x, this.linked_door.room_y);
+        if (TTDGE.player == game_character) {
+          TTDGE.active_room = this.linked_door.room;
+        }
         this.linked_door.room.visited = true;
       }
     }

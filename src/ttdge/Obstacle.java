@@ -38,6 +38,12 @@ public class Obstacle extends Thing {
   }
 
   @Override
+  public void destroy() {
+    world.things.remove(this.id);
+    this.world = null;
+  }
+
+  @Override
   public void draw() {
     TTDGE.papplet.pushStyle();
     TTDGE.papplet.fill(0);

@@ -51,6 +51,12 @@ public class Item extends Thing {
   }
 
   @Override
+  public void destroy() {
+    world.things.remove(this.id);
+    this.world = null;
+  }
+
+  @Override
   public void take(GameCharacter game_character) {
     game_character.items.add(this);
     if (this.room != null) {

@@ -15,7 +15,7 @@ public class World {
 
   public ArrayList<Room> rooms = new ArrayList<Room>();
   public Room starting_room = null;
-
+  public ArrayList<GameCharacter> game_characters = new ArrayList<GameCharacter>();
 
   public World(String name) {
     this.name = name;

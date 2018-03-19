@@ -49,6 +49,19 @@ public class Room extends Thing {
   }
 
   @Override
+  public void destroy() {
+    world.things.remove(this.id);
+    world.rooms.remove(this);
+    for (int i=0; i < this.room_width; i++) {
+      for (int j=0; j < this.room_height; j++) {
+        this.grid[i][j].destroy();
+
+      }
+    }
+    this.world = null;
+  }
+
+  @Override
   public void draw() {
     TTDGE.papplet.pushStyle();
     if (this.highlight) {
@@ -73,6 +86,13 @@ public class Room extends Thing {
         }
       }
     }
+   Iterator<GameCharacter> itr = world.game_characters.iterator();
+   while (itr.hasNext()) {
+     GameCharacter character = itr.next();
+     if (character.room == TTDGE.active_room) {
+       character.draw();
+     }
+   }
   }
 
   public void draw_on_map() {
@@ -107,6 +127,9 @@ public class Room extends Thing {
 
   public void set_thing(Thing thing, int room_x, int room_y) {
     if (grid[room_x][room_y] == null) {
+      if (thing.room != null) {
+        thing.room.grid[thing.room_x][thing.room_y] = null;
+      }
       grid[room_x][room_y] = thing;
       thing.room = this;
       thing.room_x = room_x;
@@ -117,18 +140,40 @@ public class Room extends Thing {
     }
   }
 
-  public Thing pointed_thing() {
+  public int pointed_cell_x() {
     int x = TTDGE.papplet.mouseX - TTDGE.x_offset;
+    if (x > 0 && x < room_width*TTDGE.room_grid_size) {
+      return x/TTDGE.room_grid_size;
+    }
+    else {
+      return -999999;
+    }
+  }
+
+  public int pointed_cell_y() {
     int y = TTDGE.papplet.mouseY - TTDGE.y_offset;
-    if (x > 0 && y > 0 && x < room_width*TTDGE.room_grid_size && y < room_height*TTDGE.room_grid_size) {
+    if (y > 0 && y < room_height*TTDGE.room_grid_size) {
+      return y/TTDGE.room_grid_size;
+    }
+    else {
+      return -999999;
+    }
+  }
+
+  public Thing pointed_thing() {
+    int x = this.pointed_cell_x();
+    int y = this.pointed_cell_y();
+    if (x + y >= 0) {
       Iterator<GameCharacter> itr = GameCharacter.game_characters.iterator();
       while (itr.hasNext()) {
         GameCharacter character = itr.next();
-        if (character.room == this && character.room_coords_point_to(x, y)) {
+        int room_coord_x = TTDGE.papplet.mouseX - TTDGE.x_offset;
+        int room_coord_y = TTDGE.papplet.mouseY - TTDGE.y_offset;
+        if (character.room == this && character.room_coords_point_to(room_coord_x, room_coord_y)) {
           return character;
         }
       }
-      Thing thing = this.grid[x/TTDGE.room_grid_size][y/TTDGE.room_grid_size];
+      Thing thing = this.grid[x][y];
       if (thing == null) {
         return this;
       }

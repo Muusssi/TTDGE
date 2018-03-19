@@ -3,13 +3,13 @@
 
 # Create a temporary library for the class files
 mkdir -p tmp
-mkdir -p tmp/ttdge
-cp data/*.png tmp/ttdge/
+mkdir -p tmp/images
+cp media/*.png tmp/images/
 # Compile the jave code
 javac src/ttdge/*.java -d tmp/ -cp core.jar
 cd tmp
 # Collect to jar
-jar cf ../library/TTDGE/library/ttdge.jar ttdge/*.class ttdge/*.png
+jar cf ../library/TTDGE/library/ttdge.jar ttdge/*.class images/*.png
 cd ..
 # Remove tmp folder
 rm -r tmp

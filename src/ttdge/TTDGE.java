@@ -62,9 +62,6 @@ public class TTDGE {
     if (active_room != null) {
       active_room.draw();
     }
-    else if (player != null && player.room != null) {
-      player.room.draw();
-    }
     else {
       fatal_error("Unable to draw room: active room unknown!");
     }
@@ -92,20 +89,22 @@ public class TTDGE {
     pressed_keys.put((int)TTDGE.papplet.key, false);
   }
 
-  public static void notice_mouse_press() {
+  public static TUIelement notice_mouse_press() {
       Iterator<Button> itr = buttons.iterator();
       while (itr.hasNext()) {
-        Button painike = itr.next();
-          if (painike.cursor_points()) {
-              painike.press();
+        Button btn = itr.next();
+          if (btn.cursor_points()) {
+              btn.press();
+              return btn;
           }
       }
+      return null;
   }
 
   public static void draw_buttons() {
       Iterator<Button> itr = buttons.iterator();
       while (itr.hasNext()) {
-          itr.next().piirra();
+          itr.next().draw();
       }
   }
 

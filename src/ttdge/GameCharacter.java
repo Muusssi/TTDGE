@@ -1,12 +1,10 @@
 package ttdge;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
 import processing.core.PConstants;
-import processing.core.PImage;
 
 public class GameCharacter extends Thing {
 
@@ -23,33 +21,15 @@ public class GameCharacter extends Thing {
 
   public ArrayList<Item> items = new ArrayList<Item>();
 
-  public PImage image = null;
-
   // For path finding
   public int room_target_x = -1;
   public int room_target_y = -1;
   public String path = null;
 
-  public GameCharacter(World world, String id, String name, String description, PImage image) {
+  public GameCharacter(World world, String id, String name, String description) {
     super(world, id, name, description);
-    if (image == null) {
-      try {
-        URL fileUrl = getClass().getResource(this.default_image_file_name());
-        System.out.println(fileUrl.getFile());
-        this.image = TTDGE.papplet.loadImage(fileUrl.getFile());
-        //BufferedImage b_image = ImageIO.read(Applet.class.getResourceAsStream(fileUrl.getFile()));
-        //this.image = new PImage(b_image);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-
-    if (TTDGE.player == null) {
-      TTDGE.player = this;
-    }
-
-
     game_characters.add(this);
+    world.game_characters.add(this);
   }
 
   @Override
@@ -67,17 +47,16 @@ public class GameCharacter extends Thing {
     String id = json.getString("id");
     String name = json.getString("name");
     String description = json.getString("description");
-    //System.out.println(GameCharacter.image_file_name());
-    //String file_name = json.getString("image");
-    //GameCharacter.image_file_name()
-    //System.out.println(file_name);
-    //PImage image =  TTDGE.papplet.loadImage(file_name);
-    GameCharacter new_character = new GameCharacter(world, id, name, description, null);
-    //new_character.image_file_name = file_name;
+    GameCharacter new_character = new GameCharacter(world, id, name, description);
     new_character.speed = json.getInt("speed");
     new_character.last_direction = (char)json.getInt("last_direction");
     new_character.x = (json.getInt("x")/new_character.speed)*new_character.speed;
     new_character.y = (json.getInt("y")/new_character.speed)*new_character.speed;
+    new_character.set_image(json.getString("image"));
+    if (new_character.image == null) {
+      TTDGE.error("Image for character was not found. Using default image instead.");
+      new_character.set_image(null);
+    }
     new_character.json = json;
     return new_character;
   }
@@ -87,8 +66,20 @@ public class GameCharacter extends Thing {
     this.room = world.get_room(this.json.getString("room"));
     if (TTDGE.player == null && this.json.getBoolean("player")) {
       TTDGE.player = this;
+      TTDGE.active_room = this.room;
     }
     this.json = null;
+  }
+
+  @Override
+  public void destroy() {
+    world.things.remove(this.id);
+    this.world = null;
+  }
+
+  @Override
+  public String default_image_file_name() {
+    return "/images/TTDGE1.png";
   }
 
   @Override
@@ -104,24 +95,25 @@ public class GameCharacter extends Thing {
       }
       TTDGE.papplet.image(image, -this.image.width/2, -this.image.height/2);
       TTDGE.papplet.popMatrix();
-
-      if (this.highlight) {
-        TTDGE.papplet.pushStyle();
-        TTDGE.papplet.stroke(255, 0, 0);
-        TTDGE.papplet.strokeWeight(3);
-        TTDGE.papplet.noFill();
-        TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*4, this.radius*4);
-        TTDGE.papplet.popStyle();
-      }
     }
     else {
       TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*2, this.radius*2);
+    }
+    if (this.highlight) {
+      TTDGE.papplet.pushStyle();
+      TTDGE.papplet.stroke(255, 0, 0);
+      TTDGE.papplet.strokeWeight(3);
+      TTDGE.papplet.noFill();
+      TTDGE.papplet.ellipse(TTDGE.x_offset + x, TTDGE.y_offset + y, this.radius*4, this.radius*4);
+      TTDGE.papplet.popStyle();
     }
     if (this.direction != 0) {
       this.last_direction = this.direction;
     }
     this.direction = 0;
   }
+
+
 
   public boolean room_coords_point_to(int x, int y) {
     if (Math.abs(this.x - x) < this.radius && Math.abs(this.y - y) < this.radius) {
@@ -504,15 +496,6 @@ public class GameCharacter extends Thing {
   @Override
   public String default_name() {
     return "GameCharacter";
-  }
-
-  public static String image_file_name() {
-    return "TTDGE1.png";
-  }
-
-  @Override
-  public String default_image_file_name() {
-    return GameCharacter.image_file_name();
   }
 
 
