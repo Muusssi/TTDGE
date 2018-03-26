@@ -49,7 +49,13 @@ public abstract class Thing {
       this.description = description;
     }
     world.things.put(this.id, this);
+  }
 
+  public void remove_from_room() {
+    if (this.room != null) {
+      this.room.grid[this.room_x][this.room_y] = null;
+      this.room = null;
+    }
   }
 
   public JSON base_world_file_object() {

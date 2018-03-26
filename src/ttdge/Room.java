@@ -55,7 +55,6 @@ public class Room extends Thing {
     for (int i=0; i < this.room_width; i++) {
       for (int j=0; j < this.room_height; j++) {
         this.grid[i][j].destroy();
-
       }
     }
     this.world = null;

@@ -24,11 +24,9 @@ abstract class ThingButton extends Button {
 
   public void set() {
     Thing pointed_thing = TTDGE.active_room.pointed_thing();
-    if (pointed_thing == null || pointed_thing.type_name() == "Room") {
+    if (pointed_thing == null || pointed_thing.type_name().equals("Room")) {
       set_new_thing();
     }
-    //next_new_thing = null;
-    //this.pressed = false;
   }
 
   public abstract void set_new_thing();
@@ -80,4 +78,23 @@ class ItemButton extends ThingButton {
   }
 }
 
+public class DestroyButton extends Button {
+
+  public DestroyButton() {
+    super("Destroy", 20, 20);
+  }
+
+  public void action() {
+    if (selected_thing != null) {
+      println(selected_thing);
+      if (!selected_thing.type_name().equals("Room")) {
+        selected_thing.destroy();
+      }
+      else if (mode == MAP_MODE) {
+        selected_thing.destroy();
+      }
+    }
+  }
+
+}
 

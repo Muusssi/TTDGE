@@ -25,6 +25,7 @@ void setup() {
   new ObstacleButton();
   new DoorButton();
   new ItemButton();
+  new DestroyButton();
 }
 
 void draw() {

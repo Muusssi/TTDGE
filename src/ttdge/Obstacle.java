@@ -39,6 +39,7 @@ public class Obstacle extends Thing {
 
   @Override
   public void destroy() {
+    remove_from_room();
     world.things.remove(this.id);
     this.world = null;
   }

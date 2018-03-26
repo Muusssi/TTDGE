@@ -45,6 +45,7 @@ public class Door extends Thing {
 
   @Override
   public void destroy() {
+    remove_from_room();
     this.unlink();
     world.things.remove(this.id);
     this.world = null;
