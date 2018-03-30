@@ -142,6 +142,8 @@ public abstract class Thing {
 
   public abstract void draw();
 
+  public void draw_on_map() {}
+
   public abstract void linking_actions();
 
   public abstract void destroy();

@@ -119,6 +119,32 @@ public class Door extends Thing {
       TTDGE.papplet.strokeWeight(3);
     }
     TTDGE.papplet.rect(TTDGE.x_offset + room_x*TTDGE.room_grid_size, TTDGE.y_offset + room_y*TTDGE.room_grid_size, TTDGE.room_grid_size, TTDGE.room_grid_size);
+    if (TTDGE.debug_mode) {
+      TTDGE.papplet.stroke(0, 255, 0);
+      TTDGE.papplet.fill(255, 0, 0);
+      TTDGE.papplet.text(this.id, TTDGE.x_offset + room_x*TTDGE.room_grid_size, TTDGE.y_offset + room_y*TTDGE.room_grid_size);
+    }
+    TTDGE.papplet.popStyle();
+  }
+
+  @Override
+  public void draw_on_map() {
+    TTDGE.papplet.pushStyle();
+    TTDGE.papplet.stroke(0);
+    TTDGE.papplet.fill(102, 51, 0);
+    TTDGE.papplet.rect(
+        TTDGE.x_map_offset + room.world_map_x*TTDGE.map_grid_size + room_x*TTDGE.map_grid_size,
+        TTDGE.y_map_offset + room.world_map_y*TTDGE.map_grid_size + room_y*TTDGE.map_grid_size,
+        TTDGE.map_grid_size, TTDGE.map_grid_size);
+    if (this.linked_door != null) {
+      TTDGE.papplet.pushStyle();
+      TTDGE.papplet.line(
+          TTDGE.x_map_offset + room.world_map_x*TTDGE.map_grid_size + room_x*TTDGE.map_grid_size,
+          TTDGE.y_map_offset + room.world_map_y*TTDGE.map_grid_size + room_y*TTDGE.map_grid_size,
+          TTDGE.x_map_offset + linked_door.room.world_map_x*TTDGE.map_grid_size + linked_door.room_x*TTDGE.map_grid_size,
+          TTDGE.y_map_offset + linked_door.room.world_map_y*TTDGE.map_grid_size + linked_door.room_y*TTDGE.map_grid_size);
+      TTDGE.papplet.popStyle();
+    }
     TTDGE.papplet.popStyle();
   }
 

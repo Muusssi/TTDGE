@@ -94,6 +94,7 @@ public class Room extends Thing {
    }
   }
 
+  @Override
   public void draw_on_map() {
     TTDGE.papplet.pushStyle();
     if (this.highlight) {
@@ -103,6 +104,16 @@ public class Room extends Thing {
           TTDGE.x_map_offset + world_map_x*TTDGE.map_grid_size, TTDGE.y_map_offset + world_map_y*TTDGE.map_grid_size,
           this.room_width*TTDGE.map_grid_size, this.room_height*TTDGE.map_grid_size
         );
+
+    for (int i = 0; i < room_width; ++i) {
+      for (int j = 0; j < room_height; ++j) {
+        Thing thing = this.grid[i][j];
+        if (thing != null) {
+          thing.draw_on_map();
+        }
+      }
+    }
+
     TTDGE.papplet.popStyle();
   }
 
