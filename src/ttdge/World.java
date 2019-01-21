@@ -55,27 +55,26 @@ public class World {
 
   Thing load_thing(JSON json) {
     String thing_type = json.getString("type");
+    Thing loaded_thing = null;
     if (thing_type.equals("Room")) {
-      Room new_room = Room.create(this, json);
-      rooms.add(new_room);
-      return new_room;
+      loaded_thing = Room.create(this, json);
     }
     else if (thing_type.equals("Door")) {
-      Door.create(this, json);
+      loaded_thing = Door.create(this, json);
     }
     else if (thing_type.equals("Obstacle")) {
-      Obstacle.create(this, json);
+      loaded_thing = Obstacle.create(this, json);
     }
     else if (thing_type.equals("GameCharacter")) {
-      GameCharacter.create(this, json);
+      loaded_thing = GameCharacter.create(this, json);
     }
     else if (thing_type.equals("Item")) {
-      Item.create(this, json);
+      loaded_thing = Item.create(this, json);
     }
     else {
       TTDGE.fatal_error("World file corrupted: '"+world_file+"'. Unsupported thing: '"+thing_type+"'");
     }
-    return null;
+    return loaded_thing;
   }
 
   public void draw_map() {

@@ -1,4 +1,13 @@
 
+void create_buttons() {
+  new ObstacleButton();
+  new DoorButton();
+  new ItemButton();
+  new DestroyButton();
+}
+
+
+
 ArrayList<ThingButton> thing_buttons = new ArrayList<ThingButton>();
 
 abstract class ThingButton extends Button {
@@ -93,8 +102,8 @@ public class DestroyButton extends Button {
       else if (mode == MAP_MODE) {
         selected_thing.destroy();
       }
+      selected_thing = null;
     }
   }
 
 }
-

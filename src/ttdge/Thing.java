@@ -9,10 +9,8 @@ import javax.imageio.ImageIO;
 import processing.core.PImage;
 
 
-public abstract class Thing {
+public abstract class Thing extends TTDGEObject {
 
-  public String id;
-  public World world;
   public String name;
   public String description;
 
@@ -22,11 +20,10 @@ public abstract class Thing {
   public Room room;
   public int room_x, room_y;
 
-  public JSON json = null;
-
   public boolean highlight = false;
 
   public Thing (World world, String id, String name, String description) {
+    super(world, id);
     if (name == null || name.equals("null")) {
       this.name = this.default_name();
     }
@@ -34,14 +31,7 @@ public abstract class Thing {
       this.name = name;
     }
     this.name = name;
-    this.world = world;
 
-    if (id == null || id.equals("")) {
-      this.id = id();
-    }
-    else {
-      this.id = id;
-    }
     if (description == null || description.equals("null")) {
       this.description = default_description();
     }
@@ -58,8 +48,8 @@ public abstract class Thing {
     }
   }
 
-  public JSON base_world_file_object() {
-    JSON json = new JSON();
+  public JSON world_file_object() {
+    JSON json = this.base_world_file_object();
     json.set("type", this.type_name());
     json.set("id", this.id);
     json.set("name", this.name);
@@ -123,22 +113,9 @@ public abstract class Thing {
     return null;
   }
 
-
-  protected String id() {
-    String new_id = type_name() + "-" + this.world.id_counter_next();
-    while (this.world.things.containsKey(new_id)) {
-      new_id = type_name() + "-" + this.world.id_counter_next();
-    }
-    return new_id;
-  }
-
   public abstract String default_name();
 
   public abstract String default_description();
-
-  public abstract String type_name();
-
-  public abstract JSON world_file_object();
 
   public abstract void draw();
 

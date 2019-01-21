@@ -5,10 +5,9 @@ final static int NORMAL_MODE = 1;
 final static int MAP_MODE = 2;
 final static int NEW_ROOM_MODE = 3;
 
+int mode = MAP_MODE;
 
 World world;
-
-int mode = NORMAL_MODE;
 
 Thing selected_thing = null;
 Room selected_room = null;
@@ -21,11 +20,7 @@ void setup() {
   TTDGE.x_offset = 200;
   TTDGE.debug_mode = true;
   world = TTDGE.load_world("test_world.json");
-  TTDGE.active_room = world.rooms.get(0);
-  new ObstacleButton();
-  new DoorButton();
-  new ItemButton();
-  new DestroyButton();
+  create_buttons();
 }
 
 void draw() {
