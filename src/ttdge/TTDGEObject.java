@@ -17,7 +17,7 @@ public abstract class TTDGEObject {
     }
   }
 
-  public JSON base_world_file_object() {
+  public JSON world_file_object() {
     JSON json = new JSON();
     json.set("type", this.type_name());
     json.set("id", this.id);

@@ -48,10 +48,9 @@ public abstract class Thing extends TTDGEObject {
     }
   }
 
+  @Override
   public JSON world_file_object() {
-    JSON json = this.base_world_file_object();
-    json.set("type", this.type_name());
-    json.set("id", this.id);
+    JSON json = super.world_file_object();
     json.set("name", this.name);
     json.set("description", this.name);
     json.set("room", this.room);

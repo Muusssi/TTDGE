@@ -89,7 +89,7 @@ void keyPressed() {
   }
   if (selected_thing != null) {
     if (keyCode == 'G') {
-      if (selected_thing.type_name().equals("Door")) {
+      if (selected_thing instanceof Door) {
         Door other_door = ((Door)selected_thing).linked_door;
         if (other_door != null) {
           selected_room = other_door.room;

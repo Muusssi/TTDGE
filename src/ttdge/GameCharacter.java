@@ -34,7 +34,7 @@ public class GameCharacter extends Thing {
 
   @Override
   public JSON world_file_object() {
-    JSON json = this.base_world_file_object();
+    JSON json = super.world_file_object();
     json.set("x", this.x);
     json.set("y", this.y);
     json.set("speed", this.speed);

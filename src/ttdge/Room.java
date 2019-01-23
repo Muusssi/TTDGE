@@ -39,7 +39,7 @@ public class Room extends Thing {
 
   @Override
   public JSON world_file_object() {
-    JSON json = this.base_world_file_object();
+    JSON json = super.world_file_object();
     json.set("room_width", this.room_width);
     json.set("room_height", this.room_height);
     json.set("visited", this.visited);

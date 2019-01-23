@@ -12,7 +12,7 @@ public class Door extends Thing {
 
   @Override
   public JSON world_file_object() {
-    JSON json = this.base_world_file_object();
+    JSON json = super.world_file_object();
     json.set("room_x", this.room_x);
     json.set("room_y", this.room_y);
     json.set("linked_door", this.linked_door);
