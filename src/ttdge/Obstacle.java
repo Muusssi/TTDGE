@@ -3,56 +3,45 @@ package ttdge;
 
 public class Obstacle extends Thing {
 
-  public int x = -1;
-  public int y = -1;
+  public int x, y;
   protected String[] for_linking = null;
 
-  public Obstacle(World world, String id, String name, String description) {
-    super(world, id, name, description);
+  public Obstacle(Room room, String id, String name, String description, int x, int y) {
+    super(id, name, description);
+    this.x = x;
+    this.y = y;
+    room.set_thing(this, x, y);
   }
 
-  public static Obstacle create(World world, JSON json) {
-    String id = json.getString("id");
-    String name = json.getString("name");
-    String description = json.getString("description");
-    Obstacle new_obstacle = new Obstacle(world, id, name, description);
-    new_obstacle.json = json;
-    return new_obstacle;
+  public Obstacle(JSON json, Room room) {
+    super(json);
+    this.x = json.getInt("x");
+    this.y = json.getInt("y");
+    room.add_child(this);
   }
 
   @Override
-  public JSON world_file_object() {
-    JSON json = super.world_file_object();
+  public JSON save_file_object() {
+    JSON json = super.save_file_object();
     return json;
   }
 
   @Override
-  public void linking_actions() {
-    this.room = world.get_room(this.json.getString("room"));
-    int room_x = json.getInt("room_x");
-    int room_y = json.getInt("room_y");
-    if (room_x > 0 || room_y > 0) {
-      room.set_thing(this, room_x, room_y);
-    }
-    this.json = null;
-  }
-
-  @Override
   public void destroy() {
-    remove_from_room();
-    world.things.remove(this.id);
-    this.world = null;
+    super.destroy();
   }
 
   @Override
-  public void draw() {
+  public void draw_on_parent() {
     TTDGE.papplet.pushStyle();
     TTDGE.papplet.fill(0);
     if (this.highlight) {
       TTDGE.papplet.stroke(255, 0, 0);
       TTDGE.papplet.strokeWeight(3);
     }
-    TTDGE.papplet.rect(TTDGE.x_offset + room_x*TTDGE.room_grid_size, TTDGE.y_offset + room_y*TTDGE.room_grid_size, TTDGE.room_grid_size, TTDGE.room_grid_size);
+    TTDGE.papplet.rect(TTDGE.x_offset + x - TTDGE.room_grid_size/2,
+                       TTDGE.y_offset + y - TTDGE.room_grid_size/2,
+                       TTDGE.room_grid_size, TTDGE.room_grid_size);
     TTDGE.papplet.popStyle();
   }
 
@@ -76,6 +65,11 @@ public class Obstacle extends Thing {
   public String default_description() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public void draw() {
+    // TODO Auto-generated method stub
   }
 
 

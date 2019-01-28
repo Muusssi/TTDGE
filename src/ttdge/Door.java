@@ -3,78 +3,56 @@ package ttdge;
 
 public class Door extends Thing {
 
-  public Door linked_door;
+  public Room room;
+  public String linked_door_id;
   public boolean closed = false;
 
-  public Door(World world, String id, String name, String description) {
-    super(world, id, name, description);
+  public Door(String id, String name, String description, Room room) {
+    super(id, name, description);
+    this.room = room;
+  }
+
+  public Door(JSON json, Room room) {
+    super(json);
+    this.room = room;
+    this.linked_door_id = json.getString("linked_door");
   }
 
   @Override
-  public JSON world_file_object() {
-    JSON json = super.world_file_object();
-    json.set("room_x", this.room_x);
-    json.set("room_y", this.room_y);
-    json.set("linked_door", this.linked_door);
+  public JSON save_file_object() {
+    JSON json = super.save_file_object();
+    json.set("linked_door", this.linked_door_id);
     json.set("closed", this.closed);
     return json;
   }
 
-  public static Door create(World world, JSON json) {
-    Door new_door = new Door(world, json.getString("id"), json.getString("name"), json.getString("description"));
-    new_door.closed = json.getBoolean("closed");
-    new_door.json = json;
-    return new_door;
-  }
-
-  @Override
-  public void linking_actions() {
-    this.room = world.get_room(this.json.getString("room"));
-    int room_x = json.getInt("room_x");
-    int room_y = json.getInt("room_y");
-    if (room_x > 0 || room_y > 0) {
-      room.set_thing(this, room_x, room_y);
-    }
-    String door_id = json.getString("linked_door");
-    if (door_id != null) {
-      Door other_door = (Door)world.things.get(door_id);
-      this.link_to(other_door);
-    }
-    json = null;
-  }
-
   @Override
   public void destroy() {
-    remove_from_room();
-    this.unlink();
-    world.things.remove(this.id);
-    this.world = null;
+    super.destroy();
   }
 
-  public void link_to(Door other_door) {
-    this.linked_door = other_door;
-    other_door.linked_door = this;
+  public void link_doors(Door other_door) {
+    this.linked_door_id = other_door.id;
+    other_door.linked_door_id = this.id;
   }
 
-  public void unlink() {
-    if (this.linked_door != null) {
-      this.linked_door.linked_door = null;
-      this.linked_door = null;
-    }
+  public Door linked_door() {
+    Door linked_door = (Door) TTDGE.objects.get(this.linked_door_id);
+    return linked_door;
   }
 
   @Override
   public void go(GameCharacter game_character) {
-    if (this.linked_door != null) {
+    Door linked_door = this.linked_door();
+    if (linked_door != null) {
       if (this.closed) {
         TTDGE.message("This door closed!");
       }
       else {
-        game_character.set_to(this.linked_door.room, this.linked_door.room_x, this.linked_door.room_y);
-        if (TTDGE.player == game_character) {
-          TTDGE.active_room = this.linked_door.room;
-        }
-        this.linked_door.room.visited = true;
+        game_character.parent.remove_child(game_character);
+        game_character.add_child(game_character);
+        game_character.x = linked_door.x;
+        game_character.y = linked_door.y;
       }
     }
     else {
@@ -82,21 +60,22 @@ public class Door extends Thing {
     }
   }
 
-  @Override
-  public void open(GameCharacter game_character) {
-    this.closed = false;
-    if (this.linked_door != null) {
-      this.linked_door.closed = false;
-    }
-  }
-
-  @Override
-  public void close(GameCharacter game_character) {
-    this.closed = true;
-    if (this.linked_door != null) {
-      this.linked_door.closed = false;
-    }
-  }
+//  @Override
+//  public void open(GameCharacter game_character) {
+//    this.closed = false;
+//    Door linked_door = this.linked_door();
+//    if (linked_door != null) {
+//      linked_door.closed = false;
+//    }
+//  }
+//
+//  @Override
+//  public void close(GameCharacter game_character) {
+//    this.closed = true;
+//    if (this.linked_door != null) {
+//      this.linked_door.closed = false;
+//    }
+//  }
 
   @Override
   public String default_name() {
@@ -118,33 +97,35 @@ public class Door extends Thing {
       TTDGE.papplet.stroke(255, 0, 0);
       TTDGE.papplet.strokeWeight(3);
     }
-    TTDGE.papplet.rect(TTDGE.x_offset + room_x*TTDGE.room_grid_size, TTDGE.y_offset + room_y*TTDGE.room_grid_size, TTDGE.room_grid_size, TTDGE.room_grid_size);
+    TTDGE.papplet.rect(TTDGE.x_offset + x*TTDGE.room_grid_size - TTDGE.room_grid_size/2,
+                       TTDGE.y_offset + y*TTDGE.room_grid_size - TTDGE.room_grid_size/2,
+                       TTDGE.room_grid_size, TTDGE.room_grid_size);
     if (TTDGE.debug_mode) {
       TTDGE.papplet.stroke(0, 255, 0);
       TTDGE.papplet.fill(255, 0, 0);
-      TTDGE.papplet.text(this.id, TTDGE.x_offset + room_x*TTDGE.room_grid_size, TTDGE.y_offset + room_y*TTDGE.room_grid_size);
+      TTDGE.papplet.text(this.id, TTDGE.x_offset + x*TTDGE.room_grid_size, TTDGE.y_offset + y*TTDGE.room_grid_size);
     }
     TTDGE.papplet.popStyle();
   }
 
   @Override
-  public void draw_on_map() {
+  public void draw_on_parent() {
     TTDGE.papplet.pushStyle();
     TTDGE.papplet.stroke(0);
     TTDGE.papplet.fill(102, 51, 0);
     TTDGE.papplet.rect(
-        TTDGE.x_map_offset + room.world_map_x*TTDGE.map_grid_size + room_x*TTDGE.map_grid_size,
-        TTDGE.y_map_offset + room.world_map_y*TTDGE.map_grid_size + room_y*TTDGE.map_grid_size,
+        TTDGE.x_map_offset + room.x*TTDGE.map_grid_size + x*TTDGE.map_grid_size,
+        TTDGE.y_map_offset + room.y*TTDGE.map_grid_size + y*TTDGE.map_grid_size,
         TTDGE.map_grid_size, TTDGE.map_grid_size);
-    if (this.linked_door != null) {
-      TTDGE.papplet.pushStyle();
-      TTDGE.papplet.line(
-          TTDGE.x_map_offset + room.world_map_x*TTDGE.map_grid_size + room_x*TTDGE.map_grid_size,
-          TTDGE.y_map_offset + room.world_map_y*TTDGE.map_grid_size + room_y*TTDGE.map_grid_size,
-          TTDGE.x_map_offset + linked_door.room.world_map_x*TTDGE.map_grid_size + linked_door.room_x*TTDGE.map_grid_size,
-          TTDGE.y_map_offset + linked_door.room.world_map_y*TTDGE.map_grid_size + linked_door.room_y*TTDGE.map_grid_size);
-      TTDGE.papplet.popStyle();
-    }
+//    if (this.linked_door != null) {
+//      TTDGE.papplet.pushStyle();
+//      TTDGE.papplet.line(
+//          TTDGE.x_map_offset + room.world_map_x*TTDGE.map_grid_size + room_x*TTDGE.map_grid_size,
+//          TTDGE.y_map_offset + room.world_map_y*TTDGE.map_grid_size + room_y*TTDGE.map_grid_size,
+//          TTDGE.x_map_offset + linked_door.room.world_map_x*TTDGE.map_grid_size + linked_door.room_x*TTDGE.map_grid_size,
+//          TTDGE.y_map_offset + linked_door.room.world_map_y*TTDGE.map_grid_size + linked_door.room_y*TTDGE.map_grid_size);
+//      TTDGE.papplet.popStyle();
+//    }
     TTDGE.papplet.popStyle();
   }
 

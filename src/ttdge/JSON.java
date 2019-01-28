@@ -14,6 +14,10 @@ public class JSON {
     this.json = json;
   }
 
+  public void save(String file_name) {
+    TTDGE.papplet.saveJSONObject(json, file_name);
+  }
+
   // Setters
 
   public void set(String key, int value) {
@@ -32,6 +36,10 @@ public class JSON {
     if (thing != null) {
       json.setString(key, thing.id);
     }
+  }
+
+  public void set(String key, JSON json) {
+    this.json.setJSONObject(key, json.json);
   }
 
   public void set(String key, JSONarray array) {

@@ -8,73 +8,53 @@ import processing.core.PConstants;
 
 public class GameCharacter extends Thing {
 
-  public static ArrayList<GameCharacter> game_characters = new ArrayList<GameCharacter>();
-
-  public int x = 0;
-  public int y = 0;
   public char last_direction = 's';
   public char direction = 0;
 
   public int speed = 3;
 
-  public int radius = TTDGE.room_grid_size/3;
-
   public ArrayList<Item> items = new ArrayList<Item>();
 
   // For path finding
+  public String target_room_id = null;
   public int room_target_x = -1;
   public int room_target_y = -1;
   public String path = null;
 
   public GameCharacter(World world, String id, String name, String description) {
-    super(world, id, name, description);
-    game_characters.add(this);
-    world.game_characters.add(this);
+    super(id, name, description);
+    radius = TTDGE.room_grid_size/3;
   }
 
   @Override
-  public JSON world_file_object() {
-    JSON json = super.world_file_object();
-    json.set("x", this.x);
-    json.set("y", this.y);
+  public JSON save_file_object() {
+    JSON json = super.save_file_object();
     json.set("speed", this.speed);
     json.set("last_direction", this.last_direction);
     json.set("player", TTDGE.player == this);
+    json.set("path", this.path);
+    json.set("room_target_x", this.room_target_x);
+    json.set("room_target_y", this.room_target_y);
+    json.set("target_room", this.target_room_id);
     return json;
   }
 
-  public static GameCharacter create(World world, JSON json) {
-    String id = json.getString("id");
-    String name = json.getString("name");
-    String description = json.getString("description");
-    GameCharacter new_character = new GameCharacter(world, id, name, description);
-    new_character.speed = json.getInt("speed");
-    new_character.last_direction = (char)json.getInt("last_direction");
-    new_character.x = (json.getInt("x")/new_character.speed)*new_character.speed;
-    new_character.y = (json.getInt("y")/new_character.speed)*new_character.speed;
-    new_character.set_image(json.getString("image"));
-    if (new_character.image == null) {
-      TTDGE.error("Image for character was not found. Using default image instead.");
-      new_character.set_image(null);
-    }
-    new_character.json = json;
-    return new_character;
-  }
-
-  @Override
-  public void linking_actions() {
-    this.room = world.get_room(this.json.getString("room"));
-    if (TTDGE.player == null && this.json.getBoolean("player")) {
+  public GameCharacter(JSON json) {
+    super(json);
+    this.speed = json.getInt("speed");
+    this.last_direction = (char)json.getInt("last_direction");
+    this.path = json.getString("path");
+    this.room_target_x = json.getInt("room_target_x");
+    this.room_target_y = json.getInt("room_target_y");
+    this.target_room_id = json.getString("target_room_id");
+    if (json.getBoolean("player")) {
       TTDGE.player = this;
-      TTDGE.active_room = this.room;
     }
-    this.json = null;
   }
 
   @Override
   public void destroy() {
-    world.things.remove(this.id);
-    this.world = null;
+    super.destroy();
   }
 
   @Override
@@ -241,19 +221,21 @@ public class GameCharacter extends Thing {
     }
   }
 
+  public Room room() {
+    return (Room) this.parent;
+  }
+
   public boolean can_move_up() {
     return can_move_up(this.x, this.y);
   }
 
   public boolean can_move_up(int x, int y) {
-    int new_y = y - this.speed - this.radius;
-    if (new_y < 0) {
-      return false;
+    Room room = this.room();
+    int new_y = y - this.speed;
+    if (room.allowed_position(this, this.x, new_y)) {
+      return true;
     }
-    else if (this.room.obstacle(this, x/TTDGE.room_grid_size, new_y/TTDGE.room_grid_size)) {
-      return false;
-    }
-    return true;
+    return false;
   }
 
   public boolean can_move_down() {
@@ -261,14 +243,12 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_down(int x, int y) {
-    int new_y = y + this.speed + this.radius;
-    if (new_y > this.room.room_height*TTDGE.room_grid_size) {
-      return false;
+    Room room = this.room();
+    int new_y = y + this.speed;
+    if (room.allowed_position(this, this.x, new_y)) {
+      return true;
     }
-    else if (this.room.obstacle(this, x/TTDGE.room_grid_size, new_y/TTDGE.room_grid_size)) {
-      return false;
-    }
-    return true;
+    return false;
   }
 
   public boolean can_move_left() {
@@ -276,14 +256,12 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_left(int x, int y) {
-    int new_x = x - this.speed - this.radius;
-    if (new_x < 0) {
-      return false;
+    Room room = this.room();
+    int new_x = x - this.speed;
+    if (room.allowed_position(this, new_x, this.y)) {
+      return true;
     }
-    else if (this.room.obstacle(this, new_x/TTDGE.room_grid_size, y/TTDGE.room_grid_size)) {
-      return false;
-    }
-    return true;
+    return false;
   }
 
   public boolean can_move_right() {
@@ -291,22 +269,16 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_right(int x, int y) {
-    int new_x = x + this.speed + this.radius;
-    if (new_x > this.room.room_width*TTDGE.room_grid_size) {
-      return false;
+    Room room = this.room();
+    int new_x = x + this.speed;
+    if (room.allowed_position(this, new_x, this.y)) {
+      return true;
     }
-    else if (this.room.obstacle(this, new_x/TTDGE.room_grid_size, y/TTDGE.room_grid_size)) {
-      return false;
-    }
-    return true;
-  }
-
-  public boolean touches_obstacle() {
-
     return false;
   }
 
-  public void move_to_target() {
+
+  public void move_towards_target() {
     if (path != null && path.length() > 0) {
       this.move(path.charAt(path.length() - 1));
       path = path.substring(0, path.length() - 1);
@@ -425,58 +397,53 @@ public class GameCharacter extends Thing {
     }
   }
 
-  public void set_to(Room room, int room_x, int room_y) {
-    this.room = room;
-    this.x = (((int)((room_x + 0.5)*TTDGE.room_grid_size))/this.speed)*this.speed;
-    this.y = (((int)((room_y + 0.5)*TTDGE.room_grid_size))/this.speed)*this.speed;
-  }
 
-  public Thing thing_here() {
-    return this.room.get(this.room_x(), this.room_y());
-  }
+//  TODO: public Thing thing_here() {
+//    return this.room.get(this.room_x(), this.room_y());
+//  }
 
-  public void go_thing_here() {
-    Thing thing = thing_here();
-    if (thing != null) {
-      thing.go(this);
-    }
-  }
-
-  public void open_thing_here() {
-    Thing thing = thing_here();
-    if (thing != null) {
-      thing.open(this);
-    }
-  }
-
-  public void close_thing_here() {
-    Thing thing = thing_here();
-    if (thing != null) {
-      thing.open(this);
-    }
-  }
-
-  public void take_thing_here() {
-    Thing thing = thing_here();
-    if (thing != null) {
-      thing.take(this);
-    }
-  }
-
-  public void put_thing_here() {
-    if (this.items.size() > 0) {
-      if (this.thing_here() == null) {
-        Item item = this.items.remove(0);
-        item.put(this);
-      }
-      else {
-        System.out.println("There is already an item here.");
-      }
-    }
-    else {
-      System.out.println("There is no item here.");
-    }
-  }
+//  public void go_thing_here() {
+//    Thing thing = thing_here();
+//    if (thing != null) {
+//      thing.go(this);
+//    }
+//  }
+//
+//  public void open_thing_here() {
+//    Thing thing = thing_here();
+//    if (thing != null) {
+//      thing.open(this);
+//    }
+//  }
+//
+//  public void close_thing_here() {
+//    Thing thing = thing_here();
+//    if (thing != null) {
+//      thing.open(this);
+//    }
+//  }
+//
+//  public void take_thing_here() {
+//    Thing thing = thing_here();
+//    if (thing != null) {
+//      thing.take(this);
+//    }
+//  }
+//
+//  public void put_thing_here() {
+//    if (this.items.size() > 0) {
+//      if (this.thing_here() == null) {
+//        Item item = this.items.remove(0);
+//        item.put(this);
+//      }
+//      else {
+//        System.out.println("There is already an item here.");
+//      }
+//    }
+//    else {
+//      System.out.println("There is no item here.");
+//    }
+//  }
 
   public int room_x() {
     return this.x/TTDGE.room_grid_size;
@@ -552,7 +519,15 @@ public class GameCharacter extends Thing {
   }
 
 
+  public void enter(Room room) {
+    // TODO: enter(Room room)
+  }
 
+  @Override
+  public void draw_on_parent() {
+    // TODO Auto-generated method stub
+
+  }
 
 
 

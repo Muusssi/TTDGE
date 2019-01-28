@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import processing.core.PApplet;
 
 public class TTDGE {
-  public final static String ENGINE_VERSION = "0.1.0.0";
+  public final static String ENGINE_VERSION = "0.1.0";
   protected static PApplet papplet = null;
 
   public static boolean show_searched_points = false;
@@ -24,10 +24,13 @@ public class TTDGE {
   public static int x_map_offset = 50;
   public static int y_map_offset = 50;
 
-  public static GameCharacter player;
-  public static Room active_room = null;
+  public static GameCharacter player = null;
+  public static World active_world = null;
 
   public static HashMap<String,World> worlds = new HashMap<String,World>();
+  public static HashMap<String,TTDGEObject> objects = new HashMap<String,TTDGEObject>();
+
+  protected static int id_counter = 1;
 
   public static LinkedList<String> messages = new LinkedList<String>();
 
@@ -50,21 +53,24 @@ public class TTDGE {
     System.out.println(message);
   }
 
-
-  public static World load_world(String world_file) {
-    JSON world_json = new JSON(papplet.loadJSONObject(world_file));
-    World new_world = World.create(world_json);
-    new_world.link_things();
-    return new_world;
+  public static void load(String save_file) {
+    // TODO: load()
   }
 
-  public static void draw_active_room() {
-    if (active_room != null) {
-      active_room.draw();
+  public static void save(String save_file) {
+    JSON json = new JSON();
+    json.set("engine_version", TTDGE.ENGINE_VERSION);
+    JSONarray worlds_json = new JSONarray();
+    for (World w : worlds.values()) {
+      worlds_json.append(w.save_file_object());
     }
-    else {
-      fatal_error("Unable to draw room: active room unknown!");
-    }
+    json.set("worlds", worlds_json);
+    json.save(save_file);
+  }
+
+  protected static int id_counter_next() {
+    id_counter++;
+    return id_counter;
   }
 
   // UI Helpers

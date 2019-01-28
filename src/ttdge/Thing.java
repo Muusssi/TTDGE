@@ -6,6 +6,7 @@ import java.net.URL;
 
 import javax.imageio.ImageIO;
 
+import processing.core.PApplet;
 import processing.core.PImage;
 
 
@@ -16,52 +17,43 @@ public abstract class Thing extends TTDGEObject {
 
   public String image_file_name;
   public PImage image = null;
-
-  public Room room;
-  public int room_x, room_y;
+  public int radius = TTDGE.room_grid_size;
 
   public boolean highlight = false;
 
-  public Thing (World world, String id, String name, String description) {
-    super(world, id);
-    if (name == null || name.equals("null")) {
+  public Thing (String id, String name, String description) {
+    super(id);
+    if (name == null) {
       this.name = this.default_name();
     }
     else {
       this.name = name;
     }
-    this.name = name;
 
-    if (description == null || description.equals("null")) {
+    if (description == null) {
       this.description = default_description();
     }
     else {
       this.description = description;
     }
-    world.things.put(this.id, this);
   }
 
-  public void remove_from_room() {
-    if (this.room != null) {
-      this.room.grid[this.room_x][this.room_y] = null;
-      this.room = null;
-    }
+  public Thing(JSON json) {
+    super(json);
+    this.name = json.getString("name");
+    this.description = json.getString("description");
+    this.set_image(json.getString("image"));
+    this.radius = json.getInt("radius");
   }
 
   @Override
-  public JSON world_file_object() {
-    JSON json = super.world_file_object();
+  public JSON save_file_object() {
+    JSON json = super.save_file_object();
     json.set("name", this.name);
     json.set("description", this.name);
-    json.set("room", this.room);
-    json.set("room_x", this.room_x);
-    json.set("room_y", this.room_y);
     json.set("image", this.image_file_name);
+    json.set("radius", radius);
     return json;
-  }
-
-  public void investigate() {
-    TTDGE.message("This clearly is a " + this.name);
   }
 
   public void set_image(String file_name) {
@@ -86,43 +78,66 @@ public abstract class Thing extends TTDGEObject {
     }
   }
 
-  public void investigate(GameCharacter game_character) {}
+  // Character actions
+  public void investigate(GameCharacter game_character) {
+    TTDGE.message("This clearly is " + TTDGEUtils.article_for(this.name) + " " + this.name);
+  }
 
-  public void go(GameCharacter game_character) {}
+  public void go(GameCharacter game_character) {
+    TTDGE.message("I can't go there!");
+  }
 
-  public void hit(GameCharacter game_character) {}
+  public void hit(GameCharacter game_character) {
+    TTDGE.message("POW! Auts... Nothing happens.");
+  }
 
-  public void eat(GameCharacter game_character) {}
+  public void eat(GameCharacter game_character) {
+    TTDGE.message("No, I'm not eating that.");
+  }
 
-  public void open(GameCharacter game_character) {}
+  public void open(GameCharacter game_character) {
+    TTDGE.message("I can't open it.");
+  }
 
-  public void close(GameCharacter game_character) {}
+  public void close(GameCharacter game_character) {
+    TTDGE.message("I can't close it.");
+  }
 
-  public void take(GameCharacter game_character) {}
+  public void take(GameCharacter game_character) {
+    TTDGE.message("I can't take it.");
+  }
 
-  public void put(GameCharacter game_character) {}
+  public void put(GameCharacter game_character, Thing where) {
+    TTDGE.message("I can't put it there.");
+  }
 
-  public void operate(GameCharacter game_character) {}
+  public void combine(GameCharacter game_character, Thing with) {
+    TTDGE.message("I have no idea how to combine these.");
+  }
 
-  public boolean collide(GameCharacter game_character) {
-    return false;
+  public void operate(GameCharacter game_character) {
+    TTDGE.message("I don't know how to operate that.");
   }
 
   public String default_image_file_name() {
     return null;
   }
 
+  public boolean pointed() {
+    if (PApplet.dist(this.x, this.y, TTDGE.papplet.mouseX + TTDGE.x_offset, TTDGE.papplet.mouseY + TTDGE.y_offset) < this.radius) {
+      return true;
+    }
+    return false;
+  }
+
   public abstract String default_name();
 
   public abstract String default_description();
 
-  public abstract void draw();
-
-  public void draw_on_map() {}
-
-  public abstract void linking_actions();
-
-  public abstract void destroy();
+  @Override
+  public void destroy() {
+    super.destroy();
+  }
 
 
 }
