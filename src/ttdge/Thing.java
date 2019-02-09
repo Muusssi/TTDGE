@@ -15,9 +15,13 @@ public abstract class Thing extends TTDGEObject {
   public String name;
   public String description;
 
+  public int x, y;
+  public int width = 0;
+  public int height = 0;
+
   public String image_file_name;
   public PImage image = null;
-  public int radius = TTDGE.room_grid_size;
+  public int radius = TTDGE.room_grid_size/2;
 
   public boolean highlight = false;
 
@@ -42,7 +46,9 @@ public abstract class Thing extends TTDGEObject {
     super(json);
     this.name = json.getString("name");
     this.description = json.getString("description");
-    this.set_image(json.getString("image"));
+    this.x = json.getInt("x");
+    this.y = json.getInt("y");
+    //this.set_image(json.getString("image"));
     this.radius = json.getInt("radius");
   }
 
@@ -51,6 +57,8 @@ public abstract class Thing extends TTDGEObject {
     JSON json = super.save_file_object();
     json.set("name", this.name);
     json.set("description", this.name);
+    json.set("x", this.x);
+    json.set("y", this.y);
     json.set("image", this.image_file_name);
     json.set("radius", radius);
     return json;
@@ -77,6 +85,7 @@ public abstract class Thing extends TTDGEObject {
       this.image = TTDGE.papplet.loadImage(file_name);
     }
   }
+
 
   // Character actions
   public void investigate(GameCharacter game_character) {
@@ -107,8 +116,12 @@ public abstract class Thing extends TTDGEObject {
     TTDGE.message("I can't take it.");
   }
 
-  public void put(GameCharacter game_character, Thing where) {
+  public void put(GameCharacter game_character, Container where) {
     TTDGE.message("I can't put it there.");
+  }
+
+  public void put(GameCharacter game_character, Thing where) {
+    TTDGE.message("I can't leave it here.");
   }
 
   public void combine(GameCharacter game_character, Thing with) {
@@ -120,6 +133,12 @@ public abstract class Thing extends TTDGEObject {
   }
 
   public String default_image_file_name() {
+    return null;
+  }
+
+  @Override
+  public Thing pointed_thing() {
+    // TODO: pointed_thing()
     return null;
   }
 
@@ -137,6 +156,10 @@ public abstract class Thing extends TTDGEObject {
   @Override
   public void destroy() {
     super.destroy();
+  }
+
+  public boolean collide(GameCharacter game_character) {
+    return false;
   }
 
 

@@ -9,11 +9,16 @@ public class World extends TTDGEObject {
 
   public ArrayList<Room> rooms = new ArrayList<Room>();
   public Room active_room = null;
-  public ArrayList<GameCharacter> game_characters = new ArrayList<GameCharacter>();
 
   public World(String name) {
     super();
     this.name = name;
+    TTDGE.worlds.put(name, this);
+  }
+
+  public World(JSON json) {
+    super(json);
+    this.name = json.getString("name");
     TTDGE.worlds.put(name, this);
   }
 
@@ -35,38 +40,15 @@ public class World extends TTDGEObject {
     return rooms_json;
   }
 
-  public Room add_room(String name, String description, int width, int height) {
-    return new Room(this, null, null, null, width, height);
-  }
-
-  public Room add_room(int width, int height) {
-    return add_room(null, null, width, height);
-  }
-
   @Override
   public void draw_on_parent() {}
 
-
   @Override
   public void draw() {
-    Iterator<TTDGEObject> itr = children.iterator();
+    Iterator<Room> itr = rooms.iterator();
     while (itr.hasNext()) {
-      itr.next().draw();
+      itr.next().draw_on_parent();
     }
-  }
-
-  public Room pointed_thing_on_map() {
-    Iterator<Room> itr = this.rooms.iterator();
-    while (itr.hasNext()) {
-      Room room = itr.next();
-      if (TTDGE.papplet.mouseX - TTDGE.x_map_offset > room.world_map_x*TTDGE.map_grid_size
-        && TTDGE.papplet.mouseX - TTDGE.x_map_offset < room.world_map_x*TTDGE.map_grid_size + room.width*TTDGE.map_grid_size
-        && TTDGE.papplet.mouseY - TTDGE.y_map_offset > room.world_map_y*TTDGE.map_grid_size
-        && TTDGE.papplet.mouseY - TTDGE.y_map_offset < room.world_map_y*TTDGE.map_grid_size + room.height*TTDGE.map_grid_size) {
-        return room;
-      }
-    }
-    return null;
   }
 
   public String id_prefix() {
@@ -76,6 +58,26 @@ public class World extends TTDGEObject {
   @Override
   public String type_name() {
     return "World";
+  }
+
+  @Override
+  public Thing pointed_thing() {
+    for (Room room : rooms) {
+      if (room.is_pointed_on_parent()) {
+        return room;
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public boolean is_pointed() {
+    return false;
+  }
+
+  @Override
+  public boolean is_pointed_on_parent() {
+    return false;
   }
 
 

@@ -10,11 +10,13 @@ public class Door extends Thing {
   public Door(String id, String name, String description, Room room) {
     super(id, name, description);
     this.room = room;
+    this.room.add_thing(this);
   }
 
   public Door(JSON json, Room room) {
     super(json);
     this.room = room;
+    this.room.add_thing(this);
     this.linked_door_id = json.getString("linked_door");
   }
 
@@ -29,6 +31,9 @@ public class Door extends Thing {
   @Override
   public void destroy() {
     super.destroy();
+    if (this.room != null) {
+      this.room.remove_thing(this);
+    }
   }
 
   public void link_doors(Door other_door) {
@@ -49,8 +54,8 @@ public class Door extends Thing {
         TTDGE.message("This door closed!");
       }
       else {
-        game_character.parent.remove_child(game_character);
-        game_character.add_child(game_character);
+        game_character.room.remove_thing(game_character);
+        linked_door.room.add_thing(game_character);
         game_character.x = linked_door.x;
         game_character.y = linked_door.y;
       }
@@ -97,9 +102,8 @@ public class Door extends Thing {
       TTDGE.papplet.stroke(255, 0, 0);
       TTDGE.papplet.strokeWeight(3);
     }
-    TTDGE.papplet.rect(TTDGE.x_offset + x*TTDGE.room_grid_size - TTDGE.room_grid_size/2,
-                       TTDGE.y_offset + y*TTDGE.room_grid_size - TTDGE.room_grid_size/2,
-                       TTDGE.room_grid_size, TTDGE.room_grid_size);
+    TTDGE.papplet.rect(TTDGE.x_offset + x - this.radius, TTDGE.y_offset + y - this.radius,
+                       this.radius*2, this.radius*2);
     if (TTDGE.debug_mode) {
       TTDGE.papplet.stroke(0, 255, 0);
       TTDGE.papplet.fill(255, 0, 0);
@@ -114,9 +118,9 @@ public class Door extends Thing {
     TTDGE.papplet.stroke(0);
     TTDGE.papplet.fill(102, 51, 0);
     TTDGE.papplet.rect(
-        TTDGE.x_map_offset + room.x*TTDGE.map_grid_size + x*TTDGE.map_grid_size,
-        TTDGE.y_map_offset + room.y*TTDGE.map_grid_size + y*TTDGE.map_grid_size,
-        TTDGE.map_grid_size, TTDGE.map_grid_size);
+        TTDGE.x_map_offset + room.x + (x - this.radius)/TTDGE.map_grid_size,
+        TTDGE.y_map_offset + room.y + (y - this.radius)/TTDGE.map_grid_size,
+        this.radius/TTDGE.map_grid_size, this.radius/TTDGE.map_grid_size);
 //    if (this.linked_door != null) {
 //      TTDGE.papplet.pushStyle();
 //      TTDGE.papplet.line(
@@ -133,6 +137,18 @@ public class Door extends Thing {
   public String default_description() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public boolean is_pointed() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean is_pointed_on_parent() {
+    // TODO Auto-generated method stub
+    return false;
   }
 
 

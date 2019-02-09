@@ -4,16 +4,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
+import processing.core.PApplet;
 import processing.core.PConstants;
 
 public class GameCharacter extends Thing {
 
+  public Room room;
   public char last_direction = 's';
   public char direction = 0;
 
   public int speed = 3;
 
-  public ArrayList<Item> items = new ArrayList<Item>();
+  public ArrayList<Item> inventory = new ArrayList<Item>();
 
   // For path finding
   public String target_room_id = null;
@@ -21,8 +23,10 @@ public class GameCharacter extends Thing {
   public int room_target_y = -1;
   public String path = null;
 
-  public GameCharacter(World world, String id, String name, String description) {
+  public GameCharacter(String id, String name, String description, Room room) {
     super(id, name, description);
+    this.room = room;
+    this.room.add_thing(this);
     radius = TTDGE.room_grid_size/3;
   }
 
@@ -39,8 +43,10 @@ public class GameCharacter extends Thing {
     return json;
   }
 
-  public GameCharacter(JSON json) {
+  public GameCharacter(JSON json, Room room) {
     super(json);
+    this.room = room;
+    this.room.add_thing(this);
     this.speed = json.getInt("speed");
     this.last_direction = (char)json.getInt("last_direction");
     this.path = json.getString("path");
@@ -221,16 +227,12 @@ public class GameCharacter extends Thing {
     }
   }
 
-  public Room room() {
-    return (Room) this.parent;
-  }
-
   public boolean can_move_up() {
     return can_move_up(this.x, this.y);
   }
 
   public boolean can_move_up(int x, int y) {
-    Room room = this.room();
+    Room room = this.room;
     int new_y = y - this.speed;
     if (room.allowed_position(this, this.x, new_y)) {
       return true;
@@ -243,7 +245,7 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_down(int x, int y) {
-    Room room = this.room();
+    Room room = this.room;
     int new_y = y + this.speed;
     if (room.allowed_position(this, this.x, new_y)) {
       return true;
@@ -256,7 +258,7 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_left(int x, int y) {
-    Room room = this.room();
+    Room room = this.room;
     int new_x = x - this.speed;
     if (room.allowed_position(this, new_x, this.y)) {
       return true;
@@ -269,7 +271,7 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_right(int x, int y) {
-    Room room = this.room();
+    Room room = this.room;
     int new_x = x + this.speed;
     if (room.allowed_position(this, new_x, this.y)) {
       return true;
@@ -524,9 +526,19 @@ public class GameCharacter extends Thing {
   }
 
   @Override
-  public void draw_on_parent() {
-    // TODO Auto-generated method stub
+  public void draw_on_parent() {}
 
+  @Override
+  public boolean is_pointed() {
+    return false;
+  }
+
+  @Override
+  public boolean is_pointed_on_parent() {
+    if (PApplet.dist(TTDGE.papplet.mouseX, TTDGE.papplet.mouseY, x, y) < radius) {
+      return true;
+    }
+    return false;
   }
 
 

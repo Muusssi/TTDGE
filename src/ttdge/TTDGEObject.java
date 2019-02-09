@@ -1,20 +1,10 @@
 package ttdge;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 
 
 public abstract class TTDGEObject {
 
   public String id;
-
-  //public JSON json = null;
-
-  public int x, y;
-  public int width, height;
-
-  public TTDGEObject parent = null;
-  public ArrayList<TTDGEObject> children = new ArrayList<TTDGEObject>();
 
   public TTDGEObject() {
     this.id = new_id();
@@ -46,22 +36,18 @@ public abstract class TTDGEObject {
     JSON json = new JSON();
     json.set("type", this.type_name());
     json.set("id", this.id);
-    json.set("children", this.children_json());
     return json;
-  }
-
-  public JSONarray children_json() {
-    JSONarray array = new JSONarray();
-    Iterator<TTDGEObject> itr = this.children.iterator();
-    while (itr.hasNext()) {
-      array.append(itr.next().save_file_object());
-    }
-    return array;
   }
 
   public abstract void draw();
 
   public abstract void draw_on_parent();
+
+  public abstract boolean is_pointed();
+
+  public abstract boolean is_pointed_on_parent();
+
+  public abstract Thing pointed_thing();
 
   public abstract String type_name();
 
@@ -73,29 +59,10 @@ public abstract class TTDGEObject {
     return new_id;
   }
 
-  public void add_child(TTDGEObject child) {
-    this.children.add(child);
-    child.parent = this;
-    // TODO: efficient data structure for the child objects. e.g. k-d tree
-  }
 
-  public void remove_child(TTDGEObject child) {
-    this.children.remove(child);
-  }
 
   public void destroy() {
-    Iterator<TTDGEObject> itr = children.iterator();
-    while(itr.hasNext()) {
-      itr.next().destroy();
-    }
-    if (this.parent != null) {
-      this.parent.children.remove(this);
-    }
     TTDGE.objects.remove(this.id);
-  }
-
-  public boolean collide(GameCharacter game_character) {
-    return false;
   }
 
 }

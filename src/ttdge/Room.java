@@ -1,5 +1,6 @@
 package ttdge;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -8,32 +9,29 @@ import processing.core.PApplet;
 
 public class Room extends Thing {
 
+  World world;
+
+  public ArrayList<Thing> things = new ArrayList<Thing>();
+
   // TODO: register character visits
   public HashMap<String,Integer> visits = new HashMap<String,Integer>();
 
-  public int world_map_x = 0;
-  public int world_map_y = 0;
-
-
   public Room (World world, String id, String name, String description, int width, int height) {
     super(id, name, description);
+    this.world = world;
     this.width = width;
     this.height = height;
     world.rooms.add(this);
-
-    world_map_x = (int)(Math.random()*100);
-    world_map_y = (int)(Math.random()*100);
   }
 
   public Room (JSON json, World world) {
     super(json);
-    world.add_child(this);
+    System.out.println("super done");
+    this.world = world;
     this.width = json.getInt("width");
     this.height = json.getInt("height");
+    System.out.println("all done");
     world.rooms.add(this);
-
-    world_map_x = (int)(Math.random()*100);
-    world_map_y = (int)(Math.random()*100);
   }
 
   @Override
@@ -42,9 +40,20 @@ public class Room extends Thing {
     json.set("width", this.width);
     json.set("height", this.height);
     json.set("visits", this.visits_json());
-    json.set("x", this.x);
-    json.set("y", this.y);
+    json.set("things", things_json());
     return json;
+  }
+
+  public JSONarray things_json() {
+    JSONarray things_json = new JSONarray();
+    for (Thing thing : things) {
+      things_json.append(thing.save_file_object());
+    }
+    return things_json;
+  }
+
+  public void load_visits() {
+    // TODO: load_visits()
   }
 
   public JSON visits_json() {
@@ -58,7 +67,7 @@ public class Room extends Thing {
   @Override
   public void destroy() {
     super.destroy();
-    ((World) this.parent).rooms.remove(this);
+    world.rooms.remove(this);
   }
 
   @Override
@@ -68,33 +77,29 @@ public class Room extends Thing {
       TTDGE.papplet.stroke(255, 0, 0);
     }
     TTDGE.papplet.rect(
-          TTDGE.x_map_offset + world_map_x*TTDGE.map_grid_size, TTDGE.y_map_offset + world_map_y*TTDGE.map_grid_size,
-          this.width*TTDGE.map_grid_size, this.height*TTDGE.map_grid_size);
+          TTDGE.x_map_offset + x, TTDGE.y_map_offset + y, this.width/TTDGE.map_grid_size, this.height/TTDGE.map_grid_size);
 
-    Iterator<TTDGEObject> itr = this.children.iterator();
-    while (itr.hasNext()) {
-      itr.next().draw_on_parent();
-    }
     TTDGE.papplet.popStyle();
+    for (Thing thing : things) {
+      thing.draw_on_parent();
+    }
   }
 
   @Override
   public void draw() {
     TTDGE.papplet.pushStyle();
-    TTDGE.papplet.rect(TTDGE.x_offset, TTDGE.y_offset, width*TTDGE.room_grid_size, height*TTDGE.room_grid_size);
+    TTDGE.papplet.rect(TTDGE.x_offset, TTDGE.y_offset, width, height);
     TTDGE.papplet.popStyle();
-
-    Iterator<TTDGEObject> itr = this.children.iterator();
-    while (itr.hasNext()) {
-      itr.next().draw_on_parent();
+    for (Thing thing : things) {
+      thing.draw();
     }
   }
 
   public boolean allowed_position(GameCharacter charater, int x, int y) {
-    Iterator<TTDGEObject> itr = this.children.iterator();
+    Iterator<Thing> itr = this.things.iterator();
     while (itr.hasNext()) {
-      TTDGEObject object = itr.next();
-      if (object.collide(charater)) {
+      Thing thing = itr.next();
+      if (thing.collide(charater)) {
         if (PApplet.dist(this.x, this.y, charater.x, charater.y) < this.radius + charater.radius) {
           return false;
         }
@@ -103,18 +108,22 @@ public class Room extends Thing {
     return true;
   }
 
-
-  public void set_thing(Thing thing, int x, int y) {
-    this.add_child(thing);
-    thing.x = x;
-    thing.y = y;
+  public void add_thing(Thing thing) {
+    // TODO: K-d tree or something
+    this.things.add(thing);
   }
 
+  public void remove_thing(Thing thing) {
+    this.things.remove(thing);
+  }
+
+
+  @Override
   public Thing pointed_thing() {
     Thing thing = null;
-    Iterator<TTDGEObject> itr = this.children.iterator();
+    Iterator<Thing> itr = this.things.iterator();
     while (itr.hasNext()) {
-      thing = (Thing) itr.next();
+      thing = itr.next();
       if (thing.pointed()) {
         return thing;
       }
@@ -138,6 +147,26 @@ public class Room extends Thing {
   @Override
   public String default_description() {
     return "";
+  }
+
+  @Override
+  public boolean is_pointed() {
+    if (TTDGE.papplet.mouseX > TTDGE.x_offset && TTDGE.papplet.mouseY > TTDGE.y_offset &&
+        TTDGE.papplet.mouseX < TTDGE.x_offset + width && TTDGE.papplet.mouseY < TTDGE.y_offset + height) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean is_pointed_on_parent() {
+    if (TTDGE.papplet.mouseX > TTDGE.x_map_offset + x &&
+        TTDGE.papplet.mouseY > TTDGE.y_map_offset + y &&
+        TTDGE.papplet.mouseX < TTDGE.x_map_offset + x + width/TTDGE.map_grid_size &&
+        TTDGE.papplet.mouseY < TTDGE.y_map_offset + y + height/TTDGE.map_grid_size) {
+      return true;
+    }
+    return false;
   }
 
 

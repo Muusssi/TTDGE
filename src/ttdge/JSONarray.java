@@ -22,5 +22,8 @@ public class JSONarray {
     array.append(json.json);
   }
 
+  public int size() {
+    return array.size();
+  }
 
 }

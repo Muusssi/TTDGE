@@ -23,6 +23,9 @@ public abstract class Button extends TUIelement {
 
   public boolean stay_down = false;
   public boolean pressed = false;
+  public int pressed_on_frame = -1;
+  public int drawn_on_frame = -1;
+
 
   public Button(String text, int x, int y) {
       this.text = text;
@@ -48,33 +51,34 @@ public abstract class Button extends TUIelement {
   }
 
   public void draw() {
-      TTDGE.papplet.pushStyle();
-      if (pressed || cursor_points()){
-          if (pressed || TTDGE.papplet.mousePressed) {
-            TTDGE.papplet.fill(text_r, text_g, text_b);
-          }
-          else {
-            TTDGE.papplet.fill(active_background_r, active_background_g, active_background_b);
-          }
-      }
-      else {
-        TTDGE.papplet.fill(background_r, background_g, background_b);
-      }
+    drawn_on_frame = TTDGE.papplet.frameCount;
+    TTDGE.papplet.pushStyle();
+    if (pressed || cursor_points()){
+        if (pressed || TTDGE.papplet.mousePressed) {
+          TTDGE.papplet.fill(text_r, text_g, text_b);
+        }
+        else {
+          TTDGE.papplet.fill(active_background_r, active_background_g, active_background_b);
+        }
+    }
+    else {
+      TTDGE.papplet.fill(background_r, background_g, background_b);
+    }
+    TTDGE.papplet.stroke(text_r, text_g, text_b);
+    TTDGE.papplet.rect(x, y, width, height, 10);
+
+    if (pressed || (cursor_points() && TTDGE.papplet.mousePressed)) {
+      TTDGE.papplet.stroke(active_background_r, active_background_g, active_background_b);
+      TTDGE.papplet.fill(active_background_r, active_background_g, active_background_b);
+    }
+    else {
       TTDGE.papplet.stroke(text_r, text_g, text_b);
-      TTDGE.papplet.rect(x, y, width, height, 10);
+      TTDGE.papplet.fill(text_r, text_g, text_b);
+    }
 
-      if (pressed || (cursor_points() && TTDGE.papplet.mousePressed)) {
-        TTDGE.papplet.stroke(active_background_r, active_background_g, active_background_b);
-        TTDGE.papplet.fill(active_background_r, active_background_g, active_background_b);
-      }
-      else {
-        TTDGE.papplet.stroke(text_r, text_g, text_b);
-        TTDGE.papplet.fill(text_r, text_g, text_b);
-      }
-
-      TTDGE.papplet.textAlign(PConstants.CENTER, PConstants.CENTER);
-      TTDGE.papplet.text(text, x + width/2, y + height/2);
-      TTDGE.papplet.popStyle();
+    TTDGE.papplet.textAlign(PConstants.CENTER, PConstants.CENTER);
+    TTDGE.papplet.text(text, x + width/2, y + height/2);
+    TTDGE.papplet.popStyle();
   }
 
   public void background_color(int r, int g, int b) {
@@ -93,10 +97,6 @@ public abstract class Button extends TUIelement {
       this.active_background_b = b;
   }
 
-  public void aktiivinen_tausta_vari(int c) {
-    active_background_color(c, c, c);
-  }
-
   public void text_color(int r, int g, int b) {
       this.text_r = r;
       this.text_g = g;
@@ -108,6 +108,7 @@ public abstract class Button extends TUIelement {
   }
 
   public void press() {
+    if (pressed_on_frame != TTDGE.papplet.frameCount) {
       if (stay_down) {
         if (pressed) {
           pressed = false;
@@ -121,6 +122,8 @@ public abstract class Button extends TUIelement {
       else {
         action();
       }
+    }
+    pressed_on_frame = TTDGE.papplet.frameCount;
   }
 
   /**

@@ -3,21 +3,18 @@ package ttdge;
 
 public class Obstacle extends Thing {
 
-  public int x, y;
-  protected String[] for_linking = null;
+  Room room;
 
-  public Obstacle(Room room, String id, String name, String description, int x, int y) {
+  public Obstacle(String id, String name, String description, Room room) {
     super(id, name, description);
-    this.x = x;
-    this.y = y;
-    room.set_thing(this, x, y);
+    this.room = room;
+    room.add_thing(this);
   }
 
   public Obstacle(JSON json, Room room) {
     super(json);
-    this.x = json.getInt("x");
-    this.y = json.getInt("y");
-    room.add_child(this);
+    this.room = room;
+    room.add_thing(this);
   }
 
   @Override
@@ -29,20 +26,9 @@ public class Obstacle extends Thing {
   @Override
   public void destroy() {
     super.destroy();
-  }
-
-  @Override
-  public void draw_on_parent() {
-    TTDGE.papplet.pushStyle();
-    TTDGE.papplet.fill(0);
-    if (this.highlight) {
-      TTDGE.papplet.stroke(255, 0, 0);
-      TTDGE.papplet.strokeWeight(3);
+    if (this.room != null) {
+      this.room.remove_thing(this);
     }
-    TTDGE.papplet.rect(TTDGE.x_offset + x - TTDGE.room_grid_size/2,
-                       TTDGE.y_offset + y - TTDGE.room_grid_size/2,
-                       TTDGE.room_grid_size, TTDGE.room_grid_size);
-    TTDGE.papplet.popStyle();
   }
 
 
@@ -69,7 +55,38 @@ public class Obstacle extends Thing {
 
   @Override
   public void draw() {
+    TTDGE.papplet.pushStyle();
+    TTDGE.papplet.fill(0);
+    if (this.highlight) {
+      TTDGE.papplet.stroke(255, 0, 0);
+      TTDGE.papplet.strokeWeight(3);
+    }
+    TTDGE.papplet.rect(TTDGE.x_offset + x - this.radius, TTDGE.y_offset + y - this.radius,
+                       this.radius*2, this.radius*2);
+    TTDGE.papplet.popStyle();
+  }
+
+  @Override
+  public void draw_on_parent() {
+    TTDGE.papplet.pushStyle();
+    TTDGE.papplet.fill(0);
+    TTDGE.papplet.rect(
+        TTDGE.x_map_offset + room.x + (x - this.radius)/TTDGE.map_grid_size,
+        TTDGE.y_map_offset + room.y + (y - this.radius)/TTDGE.map_grid_size,
+        this.radius/TTDGE.map_grid_size, this.radius/TTDGE.map_grid_size);
+    TTDGE.papplet.popStyle();
+  }
+
+  @Override
+  public boolean is_pointed() {
     // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean is_pointed_on_parent() {
+    // TODO Auto-generated method stub
+    return false;
   }
 
 

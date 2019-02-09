@@ -1,23 +1,26 @@
 package play_ground;
 
 import processing.core.PApplet;
+import ttdge.TTDGE;
 
 public class ExampleGame extends PApplet{
 //
 //  World world;
 //
-//  public static void main(String[] args) {
-//    PApplet.main("play_ground.ExampleGame");
-//  }
+  public static void main(String[] args) {
+    PApplet.main("play_ground.ExampleGame");
+  }
+//
+  @Override
+  public void settings(){
+    size(800, 600);
+  }
 //
 //  @Override
-//  public void settings(){
-//    size(800, 600);
-//  }
-//
-//  @Override
-//  public void setup(){
-//    TTDGE.start_engine(this);
+  @Override
+  public void setup(){
+    TTDGE.start_engine(this);
+    TTDGE.load("/Users/tommioinonen/Documents/TTDGE/world_file_editor/foo.json");
 //
 //    world = TTDGE.load_world("test_world.json");
 ////    world = new World("Maailma");
@@ -45,7 +48,7 @@ public class ExampleGame extends PApplet{
 ////    hall.set_thing(key, 5, 6);
 //
 //
-//  }
+  }
 //
 //  @Override
 //  public void draw(){
