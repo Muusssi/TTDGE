@@ -11,8 +11,21 @@ public class Item extends Thing {
     this.radius = TTDGE.room_grid_size/4;
   }
 
+  public Item(String id, String name, String description, Room room) {
+    super(id, name, description);
+    this.room = room;
+    this.room.add_thing(this);
+    this.radius = TTDGE.room_grid_size/4;
+  }
+
   public Item(JSON json) {
     super(json);
+  }
+
+  public Item(JSON json, Room room) {
+    super(json);
+    this.room = room;
+    this.room.add_thing(this);
   }
 
   @Override
@@ -99,17 +112,16 @@ public class Item extends Thing {
     }
     TTDGE.papplet.fill(255, 255, 0);
     TTDGE.papplet.rect(TTDGE.x_offset + x - this.radius, TTDGE.y_offset + y - this.radius, this.radius*2, this.radius*2);
+    if (TTDGE.debug_mode) {
+      TTDGE.papplet.fill(255, 0, 0);
+      TTDGE.papplet.stroke(0, 255, 0);
+      TTDGE.papplet.text(this.id + ": " + this.name, TTDGE.x_offset + x, TTDGE.y_offset + y);
+    }
     TTDGE.papplet.popStyle();
   }
 
   @Override
   public void draw_on_parent() {}
-
-  @Override
-  public boolean is_pointed() {
-    // TODO Auto-generated method stub
-    return false;
-  }
 
   @Override
   public boolean is_pointed_on_parent() {

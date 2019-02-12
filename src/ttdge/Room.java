@@ -2,10 +2,7 @@ package ttdge;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map.Entry;
-
-import processing.core.PApplet;
 
 public class Room extends Thing {
 
@@ -26,11 +23,9 @@ public class Room extends Thing {
 
   public Room (JSON json, World world) {
     super(json);
-    System.out.println("super done");
     this.world = world;
     this.width = json.getInt("width");
     this.height = json.getInt("height");
-    System.out.println("all done");
     world.rooms.add(this);
   }
 
@@ -68,6 +63,9 @@ public class Room extends Thing {
   public void destroy() {
     super.destroy();
     world.rooms.remove(this);
+    for (int i = this.things.size() - 1; i >= 0; i--) {
+      this.things.get(i).destroy();
+    }
   }
 
   @Override
@@ -89,6 +87,11 @@ public class Room extends Thing {
   public void draw() {
     TTDGE.papplet.pushStyle();
     TTDGE.papplet.rect(TTDGE.x_offset, TTDGE.y_offset, width, height);
+    if (TTDGE.debug_mode) {
+      TTDGE.papplet.fill(255, 0, 0);
+      TTDGE.papplet.stroke(0, 255, 0);
+      TTDGE.papplet.text(this.id + ": " + this.name, TTDGE.x_offset, TTDGE.y_offset);
+    }
     TTDGE.papplet.popStyle();
     for (Thing thing : things) {
       thing.draw();
@@ -96,11 +99,21 @@ public class Room extends Thing {
   }
 
   public boolean allowed_position(GameCharacter charater, int x, int y) {
-    Iterator<Thing> itr = this.things.iterator();
-    while (itr.hasNext()) {
-      Thing thing = itr.next();
-      if (thing.collide(charater)) {
-        if (PApplet.dist(this.x, this.y, charater.x, charater.y) < this.radius + charater.radius) {
+    if (x < charater.radius) {
+      return false;
+    }
+    if (x > this.width - charater.radius) {
+      return false;
+    }
+    if (y < charater.radius) {
+      return false;
+    }
+    if (y > this.height - charater.radius) {
+      return false;
+    }
+    for (Thing thing : this.things) {
+      if (thing != charater) {
+        if (thing.collide_in_position(charater, x, y)) {
           return false;
         }
       }
@@ -120,16 +133,10 @@ public class Room extends Thing {
 
   @Override
   public Thing pointed_thing() {
-    Thing thing = null;
-    Iterator<Thing> itr = this.things.iterator();
-    while (itr.hasNext()) {
-      thing = itr.next();
-      if (thing.pointed()) {
+    for (Thing thing : things) {
+      if (thing.is_pointed()) {
         return thing;
       }
-    }
-    if (this.pointed()) {
-      return this;
     }
     return null;
   }

@@ -34,15 +34,25 @@ public class Door extends Thing {
     if (this.room != null) {
       this.room.remove_thing(this);
     }
+    Door linked_door = this.linked_door();
+    if (linked_door != null) {
+      linked_door.linked_door_id = null;
+    }
   }
 
-  public void link_doors(Door other_door) {
+  public void link_with(Door other_door) {
     this.linked_door_id = other_door.id;
     other_door.linked_door_id = this.id;
   }
 
   public Door linked_door() {
-    Door linked_door = (Door) TTDGE.objects.get(this.linked_door_id);
+    Door linked_door = null;
+    if (TTDGE.objects.containsKey(this.linked_door_id)) {
+      linked_door = (Door)TTDGE.objects.get(this.linked_door_id);
+    }
+    else {
+      this.linked_door_id = null;
+    }
     return linked_door;
   }
 
@@ -105,9 +115,12 @@ public class Door extends Thing {
     TTDGE.papplet.rect(TTDGE.x_offset + x - this.radius, TTDGE.y_offset + y - this.radius,
                        this.radius*2, this.radius*2);
     if (TTDGE.debug_mode) {
-      TTDGE.papplet.stroke(0, 255, 0);
       TTDGE.papplet.fill(255, 0, 0);
-      TTDGE.papplet.text(this.id, TTDGE.x_offset + x*TTDGE.room_grid_size, TTDGE.y_offset + y*TTDGE.room_grid_size);
+      if (this.linked_door() != null) {
+        TTDGE.papplet.ellipse(TTDGE.x_offset + this.x, TTDGE.y_offset + this.y, 10, 10);
+      }
+      TTDGE.papplet.stroke(0, 255, 0);
+      TTDGE.papplet.text(this.id, TTDGE.x_offset + x, TTDGE.y_offset + y);
     }
     TTDGE.papplet.popStyle();
   }
@@ -120,16 +133,15 @@ public class Door extends Thing {
     TTDGE.papplet.rect(
         TTDGE.x_map_offset + room.x + (x - this.radius)/TTDGE.map_grid_size,
         TTDGE.y_map_offset + room.y + (y - this.radius)/TTDGE.map_grid_size,
-        this.radius/TTDGE.map_grid_size, this.radius/TTDGE.map_grid_size);
-//    if (this.linked_door != null) {
-//      TTDGE.papplet.pushStyle();
-//      TTDGE.papplet.line(
-//          TTDGE.x_map_offset + room.world_map_x*TTDGE.map_grid_size + room_x*TTDGE.map_grid_size,
-//          TTDGE.y_map_offset + room.world_map_y*TTDGE.map_grid_size + room_y*TTDGE.map_grid_size,
-//          TTDGE.x_map_offset + linked_door.room.world_map_x*TTDGE.map_grid_size + linked_door.room_x*TTDGE.map_grid_size,
-//          TTDGE.y_map_offset + linked_door.room.world_map_y*TTDGE.map_grid_size + linked_door.room_y*TTDGE.map_grid_size);
-//      TTDGE.papplet.popStyle();
-//    }
+        2*this.radius/TTDGE.map_grid_size, 2*this.radius/TTDGE.map_grid_size);
+        Door linked_door = this.linked_door();
+        if (linked_door != null) {
+          TTDGE.papplet.stroke(255, 0, 0);
+          TTDGE.papplet.line(TTDGE.x_map_offset + room.x + this.x/TTDGE.map_grid_size,
+                             TTDGE.y_map_offset + room.y + this.y/TTDGE.map_grid_size,
+                             TTDGE.x_map_offset + linked_door.room.x + linked_door.x/TTDGE.map_grid_size,
+                             TTDGE.y_map_offset + linked_door.room.y + linked_door.y/TTDGE.map_grid_size);
+        }
     TTDGE.papplet.popStyle();
   }
 
@@ -137,12 +149,6 @@ public class Door extends Thing {
   public String default_description() {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  @Override
-  public boolean is_pointed() {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   @Override

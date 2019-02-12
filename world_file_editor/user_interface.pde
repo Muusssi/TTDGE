@@ -52,10 +52,7 @@ class ItemButton extends Button {
   }
 
   public void action() {
-    Room room = (Room)TTDGE.current_object;
-    Item item = new Item(null, null, null);
-    item.put_into(room);
-    selected_thing = item;
+    selected_thing = new Item(null, null, null, (Room)TTDGE.current_object);
     set_mode(NEW_THING_MODE);
   }
 }

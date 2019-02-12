@@ -1,6 +1,8 @@
 package ttdge;
 
 
+
+
 public class Obstacle extends Thing {
 
   Room room;
@@ -33,8 +35,12 @@ public class Obstacle extends Thing {
 
 
   @Override
-  public boolean collide(GameCharacter game_character) {
-    return true;
+  public boolean collide_in_position(GameCharacter game_character, int x, int y) {
+    if (x + game_character.radius > this.x - this.radius && x - game_character.radius < this.x + this.radius &&
+        y + game_character.radius > this.y - this.radius && y - game_character.radius < this.y + this.radius) {
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -73,14 +79,8 @@ public class Obstacle extends Thing {
     TTDGE.papplet.rect(
         TTDGE.x_map_offset + room.x + (x - this.radius)/TTDGE.map_grid_size,
         TTDGE.y_map_offset + room.y + (y - this.radius)/TTDGE.map_grid_size,
-        this.radius/TTDGE.map_grid_size, this.radius/TTDGE.map_grid_size);
+        2*this.radius/TTDGE.map_grid_size, 2*this.radius/TTDGE.map_grid_size);
     TTDGE.papplet.popStyle();
-  }
-
-  @Override
-  public boolean is_pointed() {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   @Override

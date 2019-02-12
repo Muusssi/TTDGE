@@ -1,11 +1,5 @@
 package ttdge;
 
-import java.awt.image.BufferedImage;
-import java.net.JarURLConnection;
-import java.net.URL;
-
-import javax.imageio.ImageIO;
-
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -19,8 +13,8 @@ public abstract class Thing extends TTDGEObject {
   public int width = 0;
   public int height = 0;
 
-  public String image_file_name;
-  public PImage image = null;
+  public String image_file_name = null;
+  public String used_image_file_name = null;
   public int radius = TTDGE.room_grid_size/2;
 
   public boolean highlight = false;
@@ -48,7 +42,7 @@ public abstract class Thing extends TTDGEObject {
     this.description = json.getString("description");
     this.x = json.getInt("x");
     this.y = json.getInt("y");
-    //this.set_image(json.getString("image"));
+    this.set_image(json.getString("image"));
     this.radius = json.getInt("radius");
   }
 
@@ -69,21 +63,13 @@ public abstract class Thing extends TTDGEObject {
       file_name = this.default_image_file_name();
     }
     this.image_file_name = file_name;
-    try {
-      URL imageurl = getClass().getResource(file_name);
-      String image_path = imageurl.getPath();
-      if (image_path.contains("TTDGE.jar!")) {
-        imageurl = new URL("jar:" + image_path);
-        JarURLConnection jarConnection = (JarURLConnection)imageurl.openConnection();
-        BufferedImage b_image = ImageIO.read(jarConnection.getInputStream());
-        this.image = new PImage(b_image);
-      }
-      else {
-        this.image = TTDGE.papplet.loadImage(image_path);
-      }
-    } catch (Exception e) {
-      this.image = TTDGE.papplet.loadImage(file_name);
+    if (file_name != null && TTDGE.load_image(file_name)) {
+      this.used_image_file_name = file_name;
     }
+  }
+
+  public PImage get_image() {
+    return TTDGE.loaded_images.get(this.used_image_file_name);
   }
 
 
@@ -142,8 +128,9 @@ public abstract class Thing extends TTDGEObject {
     return null;
   }
 
-  public boolean pointed() {
-    if (PApplet.dist(this.x, this.y, TTDGE.papplet.mouseX + TTDGE.x_offset, TTDGE.papplet.mouseY + TTDGE.y_offset) < this.radius) {
+  @Override
+  public boolean is_pointed() {
+    if (PApplet.dist(this.x, this.y, TTDGE.papplet.mouseX - TTDGE.x_offset, TTDGE.papplet.mouseY - TTDGE.y_offset) < this.radius) {
       return true;
     }
     return false;
@@ -158,7 +145,7 @@ public abstract class Thing extends TTDGEObject {
     super.destroy();
   }
 
-  public boolean collide(GameCharacter game_character) {
+  public boolean collide_in_position(GameCharacter game_character, int x, int y) {
     return false;
   }
 

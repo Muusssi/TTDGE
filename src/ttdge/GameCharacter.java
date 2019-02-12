@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
+import processing.core.PImage;
 
 public class GameCharacter extends Thing {
 
@@ -28,6 +29,9 @@ public class GameCharacter extends Thing {
     this.room = room;
     this.room.add_thing(this);
     radius = TTDGE.room_grid_size/3;
+    if (TTDGE.player == null) {
+      TTDGE.player = this;
+    }
   }
 
   @Override
@@ -61,6 +65,9 @@ public class GameCharacter extends Thing {
   @Override
   public void destroy() {
     super.destroy();
+    if (this.room != null) {
+      this.room.remove_thing(this);
+    }
   }
 
   @Override
@@ -70,7 +77,7 @@ public class GameCharacter extends Thing {
 
   @Override
   public void draw() {
-    if (this.image != null) {
+    if (this.used_image_file_name != null) {
       TTDGE.papplet.pushMatrix();
       TTDGE.papplet.translate(this.x + TTDGE.x_offset, this.y + TTDGE.y_offset);
       if (this.direction != 0) {
@@ -79,7 +86,8 @@ public class GameCharacter extends Thing {
       else {
         TTDGE.papplet.rotate(this.direction_to_angle(this.last_direction));
       }
-      TTDGE.papplet.image(image, -this.image.width/2, -this.image.height/2);
+      PImage image = this.get_image();
+      TTDGE.papplet.image(image, -image.width/2, -image.height/2);
       TTDGE.papplet.popMatrix();
     }
     else {
@@ -97,15 +105,6 @@ public class GameCharacter extends Thing {
       this.last_direction = this.direction;
     }
     this.direction = 0;
-  }
-
-
-
-  public boolean room_coords_point_to(int x, int y) {
-    if (Math.abs(this.x - x) < this.radius && Math.abs(this.y - y) < this.radius) {
-      return true;
-    }
-    return false;
   }
 
   public void move(char direction) {
@@ -232,9 +231,7 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_up(int x, int y) {
-    Room room = this.room;
-    int new_y = y - this.speed;
-    if (room.allowed_position(this, this.x, new_y)) {
+    if (this.room.allowed_position(this, x, y - this.speed)) {
       return true;
     }
     return false;
@@ -245,9 +242,7 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_down(int x, int y) {
-    Room room = this.room;
-    int new_y = y + this.speed;
-    if (room.allowed_position(this, this.x, new_y)) {
+    if (this.room.allowed_position(this, x, y + this.speed)) {
       return true;
     }
     return false;
@@ -258,9 +253,7 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_left(int x, int y) {
-    Room room = this.room;
-    int new_x = x - this.speed;
-    if (room.allowed_position(this, new_x, this.y)) {
+    if (this.room.allowed_position(this, x - this.speed, y)) {
       return true;
     }
     return false;
@@ -271,9 +264,7 @@ public class GameCharacter extends Thing {
   }
 
   public boolean can_move_right(int x, int y) {
-    Room room = this.room;
-    int new_x = x + this.speed;
-    if (room.allowed_position(this, new_x, this.y)) {
+    if (this.room.allowed_position(this, x + this.speed, y)) {
       return true;
     }
     return false;
@@ -296,19 +287,23 @@ public class GameCharacter extends Thing {
     update_path();
   }
 
-  public void follow(GameCharacter other) {
-    // TODO: follow(GameCharacter other)
-  }
+//  public void follow(GameCharacter other) {
+//    // TODO: follow(GameCharacter other)
+//  }
 
   /**
    * Updates the GameCharacters path using the A* algorithm
    */
   public void update_path() {
+    if (!this.room.allowed_position(this, room_target_x, room_target_y)) {
+      this.path = "";
+      return;
+    }
+
     PriorityQueue<WayPoint> open = new PriorityQueue<WayPoint>();
     HashSet<String> closed = new HashSet<String>();
 
-    WayPoint wp = new WayPoint("", this.x, this.y, this.room_target_x,
-                                this.room_target_y, this.speed);
+    WayPoint wp = new WayPoint("", this.x, this.y, this.room_target_x, this.room_target_y, this.speed);
     open.add(wp);
     String wp_key = this.x + "_" + this.y;
     closed.add(wp_key);
@@ -319,10 +314,10 @@ public class GameCharacter extends Thing {
         TTDGE.papplet.pushStyle();
         TTDGE.papplet.fill(255, 0, 0);
         TTDGE.papplet.noStroke();
-        TTDGE.papplet.ellipse(wp.x + TTDGE.x_offset, wp.y + TTDGE.y_offset, 5, 5);
+        TTDGE.papplet.ellipse(wp.x + TTDGE.x_offset, wp.y + TTDGE.y_offset, this.speed, this.speed);
         TTDGE.papplet.popStyle();
       }
-      if (wp.estimate == 0) {
+      if (wp.estimate < this.speed) {
         this.path = wp.path_here;
         return;
       }
@@ -447,14 +442,6 @@ public class GameCharacter extends Thing {
 //    }
 //  }
 
-  public int room_x() {
-    return this.x/TTDGE.room_grid_size;
-  }
-
-  public int room_y() {
-    return this.y/TTDGE.room_grid_size;
-  }
-
 
   @Override
   public String type_name() {
@@ -479,20 +466,31 @@ public class GameCharacter extends Thing {
     String path_here = "";
     int x, y, estimate;
 
-    @SuppressWarnings("static-access")
     public WayPoint(String path_here, int x, int y, int target_x, int target_y, int speed) {
       this.path_here = path_here;
       this.x = x;
       this.y = y;
-      this.estimate = (TTDGE.papplet.abs(x - target_x) + TTDGE.papplet.abs(y - target_y));
+      this.estimate = (int)PApplet.dist(x, y, target_x, target_y);
     }
 
     @Override
     public int compareTo(WayPoint other) {
-      return Integer.compare(
-          this.path_here.length() + this.estimate,
-          other.path_here.length() + other.estimate
-        );
+      if (this.path_here.length() + this.estimate == other.path_here.length() + other.estimate) {
+        if (this.x == other.x) {
+          return Integer.compare(this.y, other.y);
+        }
+        else {
+          return Integer.compare(this.x, other.x);
+        }
+
+      }
+      else {
+        return Integer.compare(
+            this.path_here.length() + this.estimate,
+            other.path_here.length() + other.estimate
+          );
+      }
+
     }
   }
 
@@ -529,18 +527,9 @@ public class GameCharacter extends Thing {
   public void draw_on_parent() {}
 
   @Override
-  public boolean is_pointed() {
-    return false;
-  }
-
-  @Override
   public boolean is_pointed_on_parent() {
-    if (PApplet.dist(TTDGE.papplet.mouseX, TTDGE.papplet.mouseY, x, y) < radius) {
-      return true;
-    }
     return false;
   }
-
 
 
 }

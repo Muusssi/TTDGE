@@ -24,8 +24,7 @@ public class World extends TTDGEObject {
 
   @Override
   public JSON save_file_object() {
-    JSON json = new JSON();
-    json.set("type", "World");
+    JSON json = super.save_file_object();
     json.set("name", this.name);
     json.set("rooms", rooms_json());
     return json;
@@ -45,9 +44,8 @@ public class World extends TTDGEObject {
 
   @Override
   public void draw() {
-    Iterator<Room> itr = rooms.iterator();
-    while (itr.hasNext()) {
-      itr.next().draw_on_parent();
+    for (Room room : rooms) {
+      room.draw_on_parent();
     }
   }
 

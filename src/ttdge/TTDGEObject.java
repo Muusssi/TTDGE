@@ -1,7 +1,5 @@
 package ttdge;
 
-
-
 public abstract class TTDGEObject {
 
   public String id;

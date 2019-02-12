@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import javax.swing.JOptionPane;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 
 public class TTDGE {
   public final static String ENGINE_VERSION = "0.1.0";
@@ -17,7 +18,7 @@ public class TTDGE {
   public static boolean show_searched_points = false;
   public static boolean debug_mode = false;
 
-  public static int room_grid_size = 50;
+  public static int room_grid_size = 60;
 
   public static int x_offset = 50;
   public static int y_offset = 50;
@@ -32,6 +33,8 @@ public class TTDGE {
 
   public static HashMap<String,World> worlds = new HashMap<String,World>();
   public static HashMap<String,TTDGEObject> objects = new HashMap<String,TTDGEObject>();
+
+  protected static HashMap<String,PImage> loaded_images = new HashMap<String,PImage>();
 
   protected static int id_counter = 1;
 
@@ -68,7 +71,6 @@ public class TTDGE {
     for (int w = 0; w < worlds_json.size(); w++) {
       JSON world_json = worlds_json.get(w);
       new_world = new World(world_json);
-      System.out.println("Loaded world");
       TTDGE.load_rooms(new_world, world_json.getArray("rooms"));
     }
     TTDGE.current_object = new_world;
@@ -79,9 +81,7 @@ public class TTDGE {
       JSON json = rooms_json.get(i);
       Room room = null;
       if (json.getString("type").equals("Room")) {
-        System.out.println("Loading room");
         room = new Room(json, world);
-        System.out.println("Room loaded");
       }
       else {
         if (extender != null) {
@@ -99,20 +99,15 @@ public class TTDGE {
     for (int i = 0; i < things_json.size(); i++) {
       JSON json = things_json.get(i);
       if (json.getString("type").equals("Obstacle")) {
-        System.out.println("Loading Obstacle");
         new Obstacle(json, room);
       }
       else if (json.getString("type").equals("Door")) {
-        System.out.println("Loading Door");
         new Door(json, room);
       }
       else if (json.getString("type").equals("Item")) {
-        System.out.println("Loading Item");
-        Item item = new Item(json);
-        room.add_thing(item);
+        new Item(json, room);
       }
       else if (json.getString("type").equals("GameCharacter")) {
-        System.out.println("Loading GameCharacter");
         new GameCharacter(json, room);
       }
       else {
@@ -147,6 +142,30 @@ public class TTDGE {
   protected static int id_counter_next() {
     id_counter++;
     return id_counter;
+  }
+
+  protected static boolean load_image(String file_name) {
+    if (TTDGE.loaded_images.containsKey(file_name)) {
+      return true;
+    }
+    else {
+      try {
+        PImage image = papplet.loadImage(file_name);
+        loaded_images.put(file_name, image);
+        return true;
+      } catch (Exception e) {
+        TTDGE.error("Unable to load image '" + file_name + "'.");
+      }
+    }
+    return false;
+
+  }
+
+  public static Thing pointed_thing() {
+    if (TTDGE.current_object != null) {
+      return TTDGE.current_object.pointed_thing();
+    }
+    return null;
   }
 
   // UI Helpers
