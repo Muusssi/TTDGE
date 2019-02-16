@@ -19,7 +19,6 @@ public class GameCharacter extends Thing {
   public ArrayList<Item> inventory = new ArrayList<Item>();
 
   // For path finding
-  public String target_room_id = null;
   public int room_target_x = -1;
   public int room_target_y = -1;
   public String path = null;
@@ -43,7 +42,6 @@ public class GameCharacter extends Thing {
     json.set("path", this.path);
     json.set("room_target_x", this.room_target_x);
     json.set("room_target_y", this.room_target_y);
-    json.set("target_room", this.target_room_id);
     return json;
   }
 
@@ -56,7 +54,6 @@ public class GameCharacter extends Thing {
     this.path = json.getString("path");
     this.room_target_x = json.getInt("room_target_x");
     this.room_target_y = json.getInt("room_target_y");
-    this.target_room_id = json.getString("target_room_id");
     if (json.getBoolean("player")) {
       TTDGE.player = this;
     }
@@ -395,37 +392,46 @@ public class GameCharacter extends Thing {
   }
 
 
-//  TODO: public Thing thing_here() {
-//    return this.room.get(this.room_x(), this.room_y());
-//  }
+  public Thing thing_here() {
+    return this.room.get_thing(this.x, this.y);
+  }
 
-//  public void go_thing_here() {
-//    Thing thing = thing_here();
-//    if (thing != null) {
-//      thing.go(this);
-//    }
-//  }
-//
-//  public void open_thing_here() {
-//    Thing thing = thing_here();
-//    if (thing != null) {
-//      thing.open(this);
-//    }
-//  }
-//
-//  public void close_thing_here() {
-//    Thing thing = thing_here();
-//    if (thing != null) {
-//      thing.open(this);
-//    }
-//  }
-//
-//  public void take_thing_here() {
-//    Thing thing = thing_here();
-//    if (thing != null) {
-//      thing.take(this);
-//    }
-//  }
+  public void go_thing_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.go(this);
+    }
+  }
+
+  public void open_thing_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.open(this);
+    }
+  }
+
+  public void close_thing_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.open(this);
+    }
+  }
+
+  public void take_thing_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.take(this);
+    }
+  }
+
+  public void investigate_thing_here() {
+    Thing thing = thing_here();
+    if (thing != null) {
+      thing.investigate(this);
+    }
+  }
+
+
 //
 //  public void put_thing_here() {
 //    if (this.items.size() > 0) {
@@ -494,7 +500,7 @@ public class GameCharacter extends Thing {
     }
   }
 
-  private float direction_to_angle(char direction) {
+  public float direction_to_angle(char direction) {
     switch (direction) {
     case 'w':
       return PConstants.PI;
@@ -514,7 +520,6 @@ public class GameCharacter extends Thing {
       return -PConstants.QUARTER_PI;
     default:
       return 0;
-
     }
   }
 

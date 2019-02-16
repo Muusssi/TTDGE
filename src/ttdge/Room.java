@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import processing.core.PApplet;
+
 public class Room extends Thing {
 
   World world;
@@ -119,6 +121,15 @@ public class Room extends Thing {
       }
     }
     return true;
+  }
+
+  public Thing get_thing(int x, int y) {
+    for (Thing thing : this.things) {
+      if (PApplet.dist(thing.x, thing.y, x, y) < thing.radius/2) {
+        return thing;
+      }
+    }
+    return null;
   }
 
   public void add_thing(Thing thing) {

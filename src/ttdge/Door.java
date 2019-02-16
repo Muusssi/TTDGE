@@ -66,8 +66,10 @@ public class Door extends Thing {
       else {
         game_character.room.remove_thing(game_character);
         linked_door.room.add_thing(game_character);
+        game_character.room = linked_door.room;
         game_character.x = linked_door.x;
         game_character.y = linked_door.y;
+        TTDGE.current_object = linked_door.room;
       }
     }
     else {

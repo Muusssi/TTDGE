@@ -11,7 +11,7 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 public class TTDGE {
-  public final static String ENGINE_VERSION = "0.1.0";
+  public final static String ENGINE_VERSION = "0.2.0";
   protected static PApplet papplet = null;
   public static TTDGEExtender extender = null;
 
