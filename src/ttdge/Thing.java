@@ -47,7 +47,7 @@ public abstract class Thing extends TTDGEObject {
   }
 
   @Override
-  public JSON save_file_object() {
+  protected JSON save_file_object() {
     JSON json = super.save_file_object();
     json.set("name", this.name);
     json.set("description", this.name);
@@ -56,6 +56,27 @@ public abstract class Thing extends TTDGEObject {
     json.set("image", this.image_file_name);
     json.set("radius", radius);
     return json;
+  }
+
+  @Override
+  protected ObjectEditingObject get_editing_panel() {
+    ObjectEditingObject panel = super.get_editing_panel();
+    panel.add_field("name", "Name", "Name of the thing.", this.name);
+    panel.add_field("description", "Description", "Description of the thing that is given when the player investigates the item.", this.description);
+    panel.add_field("radius", "Radius", "Radius of the area of effect for the thing.", this.radius);
+    panel.add_field("x", "X coordinate", "X coordinate for the thing.", this.x);
+    panel.add_field("y", "Y coordinate", "Y coordinate for the thing.", this.y);
+    return panel;
+  }
+
+  @Override
+  protected void update_after_editing(ObjectEditingObject oeo) {
+    super.update_after_editing(oeo);
+    this.name = oeo.get_string("name");
+    this.description = oeo.get_string("description");
+    this.radius = oeo.get_int("radius");
+    this.x = oeo.get_int("x");
+    this.y = oeo.get_int("y");
   }
 
   public void set_image(String file_name) {
@@ -124,7 +145,6 @@ public abstract class Thing extends TTDGEObject {
 
   @Override
   public Thing pointed_thing() {
-    // TODO: pointed_thing()
     return null;
   }
 

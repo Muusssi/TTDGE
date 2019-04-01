@@ -20,9 +20,20 @@ public class Obstacle extends Thing {
   }
 
   @Override
-  public JSON save_file_object() {
+  protected JSON save_file_object() {
     JSON json = super.save_file_object();
     return json;
+  }
+
+  @Override
+  protected ObjectEditingObject get_editing_panel() {
+    ObjectEditingObject panel = super.get_editing_panel();
+    return panel;
+  }
+
+  @Override
+  protected void update_after_editing(ObjectEditingObject oeo) {
+    super.update_after_editing(oeo);
   }
 
   @Override

@@ -25,9 +25,9 @@ void setup() {
   TTDGE.debug_mode = true;
   TTDGE.x_offset = 150;
 
-  TTDGE.load("../foo.json");
-  world = (World)TTDGE.current_object;
-  //world = new World("First world");
+  //TTDGE.load("../foo.json");
+  //world = (World)TTDGE.current_object;
+  world = new World("First world");
   create_buttons();
 }
 
@@ -186,6 +186,8 @@ void keyPressed() {
       linking_thing = selected_thing;
     } else if (keyCode == 'I') {
       selected_thing.investigate(TTDGE.player);
+    } else if (keyCode == 'E') {
+      selected_thing.edit();
     } else if (keyCode == 'O') {
       selected_thing.open(TTDGE.player);
     } else if (keyCode == 'C') {

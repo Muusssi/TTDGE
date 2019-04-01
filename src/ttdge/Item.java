@@ -9,6 +9,7 @@ public class Item extends Thing {
   public Item(String id, String name, String description) {
     super(id, name, description);
     this.radius = TTDGE.room_grid_size/4;
+    TTDGE.items.put(this.id, this);
   }
 
   public Item(String id, String name, String description, Room room) {
@@ -16,6 +17,7 @@ public class Item extends Thing {
     this.room = room;
     this.room.add_thing(this);
     this.radius = TTDGE.room_grid_size/4;
+    TTDGE.items.put(this.id, this);
   }
 
   public Item(JSON json) {
@@ -34,14 +36,26 @@ public class Item extends Thing {
   }
 
   @Override
-  public JSON save_file_object() {
+  protected JSON save_file_object() {
     JSON json = super.save_file_object();
     return json;
   }
 
   @Override
+  protected ObjectEditingObject get_editing_panel() {
+    ObjectEditingObject panel = super.get_editing_panel();
+    return panel;
+  }
+
+  @Override
+  protected void update_after_editing(ObjectEditingObject oeo) {
+    super.update_after_editing(oeo);
+  }
+
+  @Override
   public void destroy() {
     super.destroy();
+    TTDGE.items.remove(this.id);
     if (this.room != null) {
       this.room.remove_thing(this);
     }

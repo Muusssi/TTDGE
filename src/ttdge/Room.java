@@ -1,8 +1,6 @@
 package ttdge;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
 
 import processing.core.PApplet;
 
@@ -12,15 +10,13 @@ public class Room extends Thing {
 
   public ArrayList<Thing> things = new ArrayList<Thing>();
 
-  // TODO: register character visits
-  public HashMap<String,Integer> visits = new HashMap<String,Integer>();
-
   public Room (World world, String id, String name, String description, int width, int height) {
     super(id, name, description);
     this.world = world;
     this.width = width;
     this.height = height;
     world.rooms.add(this);
+    TTDGE.rooms.put(this.id, this);
   }
 
   public Room (JSON json, World world) {
@@ -29,19 +25,34 @@ public class Room extends Thing {
     this.width = json.getInt("width");
     this.height = json.getInt("height");
     world.rooms.add(this);
+    TTDGE.rooms.put(this.id, this);
   }
 
   @Override
-  public JSON save_file_object() {
+  protected JSON save_file_object() {
     JSON json = super.save_file_object();
     json.set("width", this.width);
     json.set("height", this.height);
-    json.set("visits", this.visits_json());
     json.set("things", things_json());
     return json;
   }
 
-  public JSONarray things_json() {
+  @Override
+  protected ObjectEditingObject get_editing_panel() {
+    ObjectEditingObject panel = super.get_editing_panel();
+    panel.add_field("width", "Width", "Width of the room.", this.width);
+    panel.add_field("height", "Height", "Height of the room.", this.height);
+    return panel;
+  }
+
+  @Override
+  protected void update_after_editing(ObjectEditingObject oeo) {
+    super.update_after_editing(oeo);
+    this.width = oeo.get_int("width");
+    this.height = oeo.get_int("height");
+  }
+
+  protected JSONarray things_json() {
     JSONarray things_json = new JSONarray();
     for (Thing thing : things) {
       things_json.append(thing.save_file_object());
@@ -49,22 +60,11 @@ public class Room extends Thing {
     return things_json;
   }
 
-  public void load_visits() {
-    // TODO: load_visits()
-  }
-
-  public JSON visits_json() {
-    JSON json = new JSON();
-    for (Entry<String, Integer> entry : visits.entrySet()) {
-      json.set(entry.getKey(), entry.getValue());
-    }
-    return json;
-  }
-
   @Override
   public void destroy() {
     super.destroy();
     world.rooms.remove(this);
+    TTDGE.rooms.remove(this.id);
     for (int i = this.things.size() - 1; i >= 0; i--) {
       this.things.get(i).destroy();
     }
@@ -164,7 +164,7 @@ public class Room extends Thing {
 
   @Override
   public String default_description() {
-    return "";
+    return "There is nothing notable about this room.";
   }
 
   @Override

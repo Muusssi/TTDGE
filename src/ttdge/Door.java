@@ -5,7 +5,6 @@ public class Door extends Thing {
 
   public Room room;
   public String linked_door_id;
-  public boolean closed = false;
 
   public Door(String id, String name, String description, Room room) {
     super(id, name, description);
@@ -21,11 +20,23 @@ public class Door extends Thing {
   }
 
   @Override
-  public JSON save_file_object() {
+  protected JSON save_file_object() {
     JSON json = super.save_file_object();
     json.set("linked_door", this.linked_door_id);
-    json.set("closed", this.closed);
     return json;
+  }
+
+  @Override
+  protected ObjectEditingObject get_editing_panel() {
+    ObjectEditingObject panel = super.get_editing_panel();
+    panel.add_field("linked_door", "Linked door", "ID of the door that this door is linked to.", this.linked_door_id);
+    return panel;
+  }
+
+  @Override
+  protected void update_after_editing(ObjectEditingObject oeo) {
+    super.update_after_editing(oeo);
+    this.linked_door_id = oeo.get_string("linked_door");
   }
 
   @Override
@@ -60,17 +71,7 @@ public class Door extends Thing {
   public void go(GameCharacter game_character) {
     Door linked_door = this.linked_door();
     if (linked_door != null) {
-      if (this.closed) {
-        TTDGE.message("This door closed!");
-      }
-      else {
-        game_character.room.remove_thing(game_character);
-        linked_door.room.add_thing(game_character);
-        game_character.room = linked_door.room;
-        game_character.x = linked_door.x;
-        game_character.y = linked_door.y;
-        TTDGE.current_object = linked_door.room;
-      }
+      game_character.enter(linked_door);
     }
     else {
       TTDGE.message("This useless passage doesn't go anywhere.");

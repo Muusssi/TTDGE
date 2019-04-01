@@ -1,5 +1,7 @@
 package ttdge;
 
+import javax.swing.JOptionPane;
+
 public abstract class TTDGEObject {
 
   public String id;
@@ -30,7 +32,7 @@ public abstract class TTDGEObject {
     TTDGE.objects.put(this.id, this);
   }
 
-  public JSON save_file_object() {
+  protected JSON save_file_object() {
     JSON json = new JSON();
     json.set("type", this.type_name());
     json.set("id", this.id);
@@ -57,7 +59,38 @@ public abstract class TTDGEObject {
     return new_id;
   }
 
+  protected ObjectEditingObject get_editing_panel() {
+    ObjectEditingObject panel = new ObjectEditingObject(this);
+    panel.add_field("id", "ID", "The unique id of this object that can be used to refer to this object.", this.id);
+    return panel;
+  }
 
+  protected void update_after_editing(ObjectEditingObject oeo) {
+    String new_id = oeo.get_string("id");
+    if (this.id.equals(new_id)) {
+      return;
+    }
+    else if (TTDGE.objects.containsKey(new_id)) {
+      TTDGE.error("Unable to update id. Given id '" + new_id + "' already in use.");
+    }
+    else {
+      this.id = new_id;
+    }
+  }
+
+  protected void post_editing_action() {}
+
+  public boolean edit() {
+    ObjectEditingObject oeo = this.get_editing_panel();
+    int res = oeo.show();
+    if (res == JOptionPane.OK_OPTION) {
+      this.update_after_editing(oeo);
+      post_editing_action();
+      return true;
+    }
+    post_editing_action();
+    return false;
+  }
 
   public void destroy() {
     TTDGE.objects.remove(this.id);

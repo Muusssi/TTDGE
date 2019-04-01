@@ -18,7 +18,7 @@ public abstract class Container extends Thing {
   }
 
   @Override
-  public JSON save_file_object() {
+  protected JSON save_file_object() {
     JSON json = super.save_file_object();
     return json;
   }

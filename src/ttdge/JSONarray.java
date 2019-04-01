@@ -23,7 +23,13 @@ public class JSONarray {
   }
 
   public int size() {
-    return array.size();
+    if (this.array != null) {
+      return array.size();
+    }
+    else {
+      return 0;
+    }
+
   }
 
 }

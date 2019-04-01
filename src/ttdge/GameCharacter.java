@@ -18,6 +18,8 @@ public class GameCharacter extends Thing {
 
   public ArrayList<Item> inventory = new ArrayList<Item>();
 
+  public HashSet<String> visited = new HashSet<String>();
+
   // For path finding
   public int room_target_x = -1;
   public int room_target_y = -1;
@@ -33,18 +35,6 @@ public class GameCharacter extends Thing {
     }
   }
 
-  @Override
-  public JSON save_file_object() {
-    JSON json = super.save_file_object();
-    json.set("speed", this.speed);
-    json.set("last_direction", this.last_direction);
-    json.set("player", TTDGE.player == this);
-    json.set("path", this.path);
-    json.set("room_target_x", this.room_target_x);
-    json.set("room_target_y", this.room_target_y);
-    return json;
-  }
-
   public GameCharacter(JSON json, Room room) {
     super(json);
     this.room = room;
@@ -57,6 +47,31 @@ public class GameCharacter extends Thing {
     if (json.getBoolean("player")) {
       TTDGE.player = this;
     }
+  }
+
+  @Override
+  protected JSON save_file_object() {
+    JSON json = super.save_file_object();
+    json.set("speed", this.speed);
+    json.set("last_direction", this.last_direction);
+    json.set("player", TTDGE.player == this);
+    json.set("path", this.path);
+    json.set("room_target_x", this.room_target_x);
+    json.set("room_target_y", this.room_target_y);
+    return json;
+  }
+
+  @Override
+  protected ObjectEditingObject get_editing_panel() {
+    ObjectEditingObject panel = super.get_editing_panel();
+    panel.add_field("speed", "Speed", "Speed that the character moves in.", this.speed);
+    return panel;
+  }
+
+  @Override
+  protected void update_after_editing(ObjectEditingObject oeo) {
+    super.update_after_editing(oeo);
+    this.speed = oeo.get_int("speed");
   }
 
   @Override
@@ -103,6 +118,9 @@ public class GameCharacter extends Thing {
     }
     this.direction = 0;
   }
+
+  @Override
+  public void draw_on_parent() {}
 
   public void move(char direction) {
     switch (direction) {
@@ -282,6 +300,7 @@ public class GameCharacter extends Thing {
     this.room_target_x = (x/this.speed)*this.speed;
     this.room_target_y = (y/this.speed)*this.speed;
     update_path();
+    // TODO: only update target if actually moved
   }
 
 //  public void follow(GameCharacter other) {
@@ -291,7 +310,7 @@ public class GameCharacter extends Thing {
   /**
    * Updates the GameCharacters path using the A* algorithm
    */
-  public void update_path() {
+  protected void update_path() {
     if (!this.room.allowed_position(this, room_target_x, room_target_y)) {
       this.path = "";
       return;
@@ -391,6 +410,18 @@ public class GameCharacter extends Thing {
     }
   }
 
+  protected void enter(Door door) {
+    this.room.remove_thing(this);
+    door.room.add_thing(this);
+    this.room = door.room;
+    this.x = door.x;
+    this.y = door.y;
+    this.visited.add(this.room.id);
+    if (TTDGE.player == this) {
+      TTDGE.current_object = door.room;
+    }
+  }
+
 
   public Thing thing_here() {
     return this.room.get_thing(this.x, this.y);
@@ -400,6 +431,7 @@ public class GameCharacter extends Thing {
     Thing thing = thing_here();
     if (thing != null) {
       thing.go(this);
+      check_quests();
     }
   }
 
@@ -407,6 +439,7 @@ public class GameCharacter extends Thing {
     Thing thing = thing_here();
     if (thing != null) {
       thing.open(this);
+      check_quests();
     }
   }
 
@@ -414,6 +447,7 @@ public class GameCharacter extends Thing {
     Thing thing = thing_here();
     if (thing != null) {
       thing.open(this);
+      check_quests();
     }
   }
 
@@ -421,6 +455,7 @@ public class GameCharacter extends Thing {
     Thing thing = thing_here();
     if (thing != null) {
       thing.take(this);
+      check_quests();
     }
   }
 
@@ -428,6 +463,7 @@ public class GameCharacter extends Thing {
     Thing thing = thing_here();
     if (thing != null) {
       thing.investigate(this);
+      check_quests();
     }
   }
 
@@ -448,6 +484,14 @@ public class GameCharacter extends Thing {
 //    }
 //  }
 
+  public void check_quests() {
+    for (Quest quest : TTDGE.started_quests) {
+      if (!quest.finished) {
+        quest.check();
+      }
+    }
+  }
+
 
   @Override
   public String type_name() {
@@ -463,7 +507,7 @@ public class GameCharacter extends Thing {
 
   @Override
   public String default_description() {
-    // TODO:
+    // TODO: default_description
     return "";
   }
 
@@ -522,14 +566,6 @@ public class GameCharacter extends Thing {
       return 0;
     }
   }
-
-
-  public void enter(Room room) {
-    // TODO: enter(Room room)
-  }
-
-  @Override
-  public void draw_on_parent() {}
 
   @Override
   public boolean is_pointed_on_parent() {

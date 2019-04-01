@@ -1,6 +1,7 @@
 package play_ground;
 
 import processing.core.PApplet;
+import ttdge.Quest;
 import ttdge.TTDGE;
 
 public class ExampleGame extends PApplet{
@@ -20,7 +21,9 @@ public class ExampleGame extends PApplet{
   @Override
   public void setup(){
     TTDGE.start_engine(this);
-    TTDGE.load("/Users/tommioinonen/Documents/TTDGE/world_file_editor/foo.json");
+    Quest q = new Quest(null,null,null,null);
+    q.edit();
+    exit();
 //
 //    world = TTDGE.load_world("test_world.json");
 ////    world = new World("Maailma");

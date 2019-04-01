@@ -5,6 +5,7 @@ void create_buttons() {
   new ItemButton();
   new RoomButton();
   new CharacterButton();
+  new QuestButton();
 }
 
 void draw_buttons(ArrayList<Button> buttons) {
@@ -83,5 +84,24 @@ public class RoomButton extends Button {
   @Override
   public void action() {
     set_mode(NEW_ROOM_MODE);
+  }
+}
+
+public class QuestButton extends Button {
+
+  public QuestButton() {
+    super("Quest", 20, 150);
+    room_buttons.add(this);
+  }
+
+  @Override
+  public void action() {
+    Quest new_quest = new Quest(null, null, null, null);
+    if (new_quest.edit()) {
+      TTDGE.current_object = new_quest;
+    }
+    else {
+      new_quest.destroy();
+    }
   }
 }
