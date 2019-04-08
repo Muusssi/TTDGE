@@ -62,6 +62,16 @@ public class Item extends Thing {
   }
 
   @Override
+  public void default_action(GameCharacter game_character) {
+    if (game_character.inventory.contains(this)) {
+      this.drop(game_character);
+    }
+    else {
+      this.take(game_character);
+    }
+  }
+
+  @Override
   public void take(GameCharacter game_character) {
     game_character.inventory.add(this);
     if (this.room != null) {
@@ -88,22 +98,15 @@ public class Item extends Thing {
   }
 
   @Override
-  public void put(GameCharacter game_character, Thing where) {
-    // TODO: put item
-    if (where instanceof Room) {
-      Room room = (Room)where;
+  public void drop(GameCharacter game_character) {
+    if (game_character.room != null) {
       this.x = game_character.x;
       this.y = game_character.y;
       room.add_thing(this);
       game_character.inventory.remove(this);
     }
-    else if (where instanceof Container) {
-      Container container = (Container)where;
-      container.add_thing(this);
-      game_character.inventory.remove(this);
-    }
     else {
-      TTDGE.message("You can't put anything in there.");
+      TTDGE.message("Im floating in a void. The item would be lost if I dropped it here.");
     }
   }
 

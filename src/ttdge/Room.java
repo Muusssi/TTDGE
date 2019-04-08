@@ -124,8 +124,12 @@ public class Room extends Thing {
   }
 
   public Thing get_thing(int x, int y) {
+    return this.get_thing(x, y, null);
+  }
+
+  public Thing get_thing(int x, int y, GameCharacter ignorable) {
     for (Thing thing : this.things) {
-      if (PApplet.dist(thing.x, thing.y, x, y) < thing.radius/2) {
+      if (thing != ignorable && PApplet.dist(thing.x, thing.y, x, y) < thing.radius/2) {
         return thing;
       }
     }

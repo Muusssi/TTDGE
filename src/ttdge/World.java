@@ -13,7 +13,7 @@ public class World extends TTDGEObject {
   public World(String name) {
     super();
     this.name = name;
-    TTDGE.worlds.put(name, this);
+    TTDGE.worlds.put(this.id, this);
   }
 
   public World(JSON json) {
@@ -37,6 +37,14 @@ public class World extends TTDGEObject {
       rooms_json.append(itr.next().save_file_object());
     }
     return rooms_json;
+  }
+
+  @Override
+  public void destroy() {
+    TTDGE.worlds.remove(this.id);
+    for (int i = this.rooms.size() - 1; i >= 0; i--) {
+      this.rooms.get(i).destroy();
+    }
   }
 
   @Override

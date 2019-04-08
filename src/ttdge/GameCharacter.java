@@ -58,6 +58,7 @@ public class GameCharacter extends Thing {
     json.set("path", this.path);
     json.set("room_target_x", this.room_target_x);
     json.set("room_target_y", this.room_target_y);
+    // TODO: inventory
     return json;
   }
 
@@ -424,7 +425,7 @@ public class GameCharacter extends Thing {
 
 
   public Thing thing_here() {
-    return this.room.get_thing(this.x, this.y);
+    return this.room.get_thing(this.x, this.y, this);
   }
 
   public void go_thing_here() {

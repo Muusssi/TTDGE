@@ -68,6 +68,11 @@ public class Door extends Thing {
   }
 
   @Override
+  public void default_action(GameCharacter game_character) {
+    this.go(game_character);
+  }
+
+  @Override
   public void go(GameCharacter game_character) {
     Door linked_door = this.linked_door();
     if (linked_door != null) {
@@ -150,13 +155,11 @@ public class Door extends Thing {
 
   @Override
   public String default_description() {
-    // TODO Auto-generated method stub
-    return null;
+    return "It is a door. I wonder where it goes...";
   }
 
   @Override
   public boolean is_pointed_on_parent() {
-    // TODO Auto-generated method stub
     return false;
   }
 

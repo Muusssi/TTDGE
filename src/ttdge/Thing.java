@@ -50,7 +50,7 @@ public abstract class Thing extends TTDGEObject {
   protected JSON save_file_object() {
     JSON json = super.save_file_object();
     json.set("name", this.name);
-    json.set("description", this.name);
+    json.set("description", this.description);
     json.set("x", this.x);
     json.set("y", this.y);
     json.set("image", this.image_file_name);
@@ -95,8 +95,12 @@ public abstract class Thing extends TTDGEObject {
 
 
   // Character actions
+  public void default_action(GameCharacter game_character) {
+    this.investigate(game_character);
+  }
+
   public void investigate(GameCharacter game_character) {
-    TTDGE.message("This clearly is " + TTDGEUtils.article_for(this.name) + " " + this.name);
+    TTDGE.message("This clearly is " + TTDGEUtils.article_for(this.type_name()) + " " + this.type_name().toLowerCase());
   }
 
   public void go(GameCharacter game_character) {
@@ -127,7 +131,7 @@ public abstract class Thing extends TTDGEObject {
     TTDGE.message("I can't put it there.");
   }
 
-  public void put(GameCharacter game_character, Thing where) {
+  public void drop(GameCharacter game_character) {
     TTDGE.message("I can't leave it here.");
   }
 
