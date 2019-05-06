@@ -6,7 +6,7 @@ import processing.core.PApplet;
 
 public class Room extends Thing {
 
-  World world;
+  public World world;
 
   public ArrayList<Thing> things = new ArrayList<Thing>();
 
@@ -189,6 +189,12 @@ public class Room extends Thing {
       return true;
     }
     return false;
+  }
+
+  public Room copy() {
+    JSON json = this.save_file_object();
+    json.set("id", this.new_id());
+    return new Room(json, this.world);
   }
 
 

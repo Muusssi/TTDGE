@@ -4,22 +4,24 @@ import java.util.ArrayList;
 
 public abstract class Container extends Thing {
 
-  Container container;
-  ArrayList<Item> items = new ArrayList<Item>();
+  public ArrayList<Item> items = new ArrayList<Item>();
 
-  public Container(Container container, String id, String name, String description) {
+  public Container(String id, String name, String description) {
     super(id, name, description);
-    this.container = container;
   }
 
-  public Container(JSON json, Container container) {
+  public Container(JSON json) {
     super(json);
-    this.container = container;
   }
 
   @Override
   protected JSON save_file_object() {
     JSON json = super.save_file_object();
+    JSONarray items_json = new JSONarray();
+    for (Item item : items) {
+      items_json.append(item.save_file_object());
+    }
+    json.set("items", items_json);
     return json;
   }
 
@@ -35,6 +37,14 @@ public abstract class Container extends Thing {
 
   public void remove_thing(Thing thing) {
     this.items.remove(thing);
+  }
+
+  @Override
+  public void destroy() {
+    for (Item item : items) {
+      item.destroy();
+    }
+    super.destroy();
   }
 
 }

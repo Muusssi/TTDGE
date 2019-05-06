@@ -90,4 +90,8 @@ public class JSON {
     return new JSONarray(json.getJSONArray(key));
   }
 
+  public JSON getObject(String key) {
+    return new JSON(json.getJSONObject(key));
+  }
+
 }

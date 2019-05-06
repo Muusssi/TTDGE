@@ -11,13 +11,12 @@ import javax.swing.JTextField;
 
 public class ObjectEditingObject {
 
-  JPanel panel = new JPanel();
-  JComboBox<String> Task_type_list = null;
-  TTDGEObject object = null;
+  public JPanel panel = new JPanel();
+  public TTDGEObject object = null;
 
-  HashMap<String,JTextField> fields = new HashMap<String,JTextField>();
-  HashMap<String,JComboBox<String>> selection_lists = new HashMap<String,JComboBox<String>>();
-  HashMap<String,Integer> original_integer_values = new HashMap<String,Integer>();
+  public HashMap<String,JTextField> fields = new HashMap<String,JTextField>();
+  public HashMap<String,JComboBox<String>> selection_lists = new HashMap<String,JComboBox<String>>();
+  public HashMap<String,Integer> original_integer_values = new HashMap<String,Integer>();
 
   public ObjectEditingObject(TTDGEObject object) {
     this.object = object;
@@ -28,6 +27,12 @@ public class ObjectEditingObject {
     add_field(field_name, label, tool_tip, Integer.toString(current_value));
     original_integer_values.put(field_name, current_value);
   }
+
+  // TODO: add boolean field (checkbox)
+//  public void add_field(String field_name, String label, String tool_tip, boolean current_value) {
+//    add_field(field_name, label, tool_tip, Integer.toString(current_value));
+//    original_integer_values.put(field_name, current_value);
+//  }
 
   public void add_field(String field_name, String label, String tool_tip, String current_value) {
     JLabel jlabel = new JLabel(label);

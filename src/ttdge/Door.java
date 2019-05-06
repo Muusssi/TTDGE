@@ -5,6 +5,8 @@ public class Door extends Thing {
 
   public Room room;
   public String linked_door_id;
+  public String key_id;
+  public boolean locked = false;
 
   public Door(String id, String name, String description, Room room) {
     super(id, name, description);
@@ -17,12 +19,16 @@ public class Door extends Thing {
     this.room = room;
     this.room.add_thing(this);
     this.linked_door_id = json.getString("linked_door");
+    this.key_id = json.getString("key_id");
+    this.locked = json.getBoolean("locked", false);
   }
 
   @Override
   protected JSON save_file_object() {
     JSON json = super.save_file_object();
     json.set("linked_door", this.linked_door_id);
+    json.set("key_id", this.key_id);
+    json.set("locked", this.locked);
     return json;
   }
 
@@ -30,6 +36,8 @@ public class Door extends Thing {
   protected ObjectEditingObject get_editing_panel() {
     ObjectEditingObject panel = super.get_editing_panel();
     panel.add_field("linked_door", "Linked door", "ID of the door that this door is linked to.", this.linked_door_id);
+    panel.add_field("key_id", "Key id", "ID of the key that lock and unlocks this door.", this.key_id);
+    // TODO: locked checkbox
     return panel;
   }
 
@@ -37,6 +45,8 @@ public class Door extends Thing {
   protected void update_after_editing(ObjectEditingObject oeo) {
     super.update_after_editing(oeo);
     this.linked_door_id = oeo.get_string("linked_door");
+    this.key_id = oeo.get_string("key_id");
+    // TODO: locked checkbox
   }
 
   @Override
@@ -69,7 +79,43 @@ public class Door extends Thing {
 
   @Override
   public void default_action(GameCharacter game_character) {
-    this.go(game_character);
+    if (this.locked) {
+      this.open(game_character);
+    }
+    else {
+      this.go(game_character);
+    }
+  }
+
+  @Override
+  public void open(GameCharacter game_character) {
+    if (this.locked) {
+      if (game_character.has_key(this.key_id)) {
+        this.locked = false;
+      }
+      else {
+        TTDGE.message("You don't have a key that fits to the lock.");
+      }
+    }
+    else {
+      TTDGE.message("The door is not locked.");
+    }
+
+  }
+
+  @Override
+  public void close(GameCharacter game_character) {
+    if (!this.locked) {
+      if (game_character.has_key(this.key_id)) {
+        this.locked = true;
+      }
+      else {
+        TTDGE.message("You don't have a key that fits to the lock.");
+      }
+    }
+    else {
+      TTDGE.message("The door is already locked.");
+    }
   }
 
   @Override

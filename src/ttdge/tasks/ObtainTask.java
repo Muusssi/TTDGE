@@ -44,7 +44,7 @@ public class ObtainTask extends Task {
   @Override
   public boolean check() {
     boolean done = false;
-    for (Item item : TTDGE.player.inventory) {
+    for (Item item : TTDGE.player.inventory.items) {
       done = done || item.id.equals(this.target_item_id);
     }
     this.done = done;

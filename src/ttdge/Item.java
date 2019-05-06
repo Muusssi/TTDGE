@@ -3,8 +3,8 @@ package ttdge;
 
 public class Item extends Thing {
 
-  Room room;
-  Container container;
+  public Room room;
+  public Container container;
 
   public Item(String id, String name, String description) {
     super(id, name, description);
@@ -20,6 +20,14 @@ public class Item extends Thing {
     TTDGE.items.put(this.id, this);
   }
 
+  public Item(String id, String name, String description, Container container) {
+    super(id, name, description);
+    this.container = container;
+    this.container.add_thing(this);
+    this.radius = TTDGE.room_grid_size/4;
+    TTDGE.items.put(this.id, this);
+  }
+
   public Item(JSON json) {
     super(json);
   }
@@ -28,6 +36,12 @@ public class Item extends Thing {
     super(json);
     this.room = room;
     this.room.add_thing(this);
+  }
+
+  public Item(JSON json, Container container) {
+    super(json);
+    this.container = container;
+    this.container.add_thing(this);
   }
 
   @Override
@@ -59,12 +73,15 @@ public class Item extends Thing {
     if (this.room != null) {
       this.room.remove_thing(this);
     }
+    if (this.container != null) {
+      this.container.remove_thing(this);
+    }
   }
 
   @Override
   public void default_action(GameCharacter game_character) {
-    if (game_character.inventory.contains(this)) {
-      this.drop(game_character);
+    if (game_character.inventory != null && game_character.inventory.items.contains(this)) {
+      this.investigate(game_character);
     }
     else {
       this.take(game_character);
@@ -73,12 +90,11 @@ public class Item extends Thing {
 
   @Override
   public void take(GameCharacter game_character) {
-    game_character.inventory.add(this);
-    if (this.room != null) {
-      this.room.remove_thing(this);
-    }
-    if (this.container != null) {
-      this.container.remove_thing(this);
+    if (game_character.inventory != null && !game_character.inventory.items.contains(this)) {
+      game_character.inventory.add_thing(this);
+      if (this.room != null) {
+        this.room.remove_thing(this);
+      }
     }
   }
 
@@ -100,10 +116,12 @@ public class Item extends Thing {
   @Override
   public void drop(GameCharacter game_character) {
     if (game_character.room != null) {
-      this.x = game_character.x;
-      this.y = game_character.y;
-      room.add_thing(this);
-      game_character.inventory.remove(this);
+      if (game_character.inventory != null && game_character.inventory.items.contains(this)) {
+        this.x = game_character.x;
+        this.y = game_character.y;
+        room.add_thing(this);
+        game_character.inventory.items.remove(this);
+      }
     }
     else {
       TTDGE.message("Im floating in a void. The item would be lost if I dropped it here.");
@@ -140,9 +158,21 @@ public class Item extends Thing {
   @Override
   public void draw_on_parent() {}
 
+  public float draw_in_inventory(float offset, boolean highlight) {
+    String prefix = "- ";
+    if (highlight) {
+      prefix = "* ";
+    }
+    String id = "";
+    if (TTDGE.debug_mode) {
+      id = this.id + ": ";
+    }
+    offset = TTDGE.long_text(prefix + id + this.name, offset, 20);
+    return offset;
+  }
+
   @Override
   public boolean is_pointed_on_parent() {
-    // TODO Auto-generated method stub
     return false;
   }
 

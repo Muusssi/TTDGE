@@ -5,6 +5,7 @@ import javax.swing.JOptionPane;
 public abstract class TTDGEObject {
 
   public String id;
+  protected boolean destroyed = false;
 
   public TTDGEObject() {
     this.id = new_id();
@@ -65,17 +66,24 @@ public abstract class TTDGEObject {
     return panel;
   }
 
+  public boolean update_id(String new_id) {
+    if (TTDGE.objects.containsKey(new_id)) {
+      TTDGE.error("Unable to update id. Given id '" + new_id + "' already in use.");
+    }
+    else {
+      TTDGE.update_object_maps(this, new_id);
+      this.id = new_id;
+      return true;
+    }
+    return false;
+  }
+
   protected void update_after_editing(ObjectEditingObject oeo) {
     String new_id = oeo.get_string("id");
     if (this.id.equals(new_id)) {
       return;
     }
-    else if (TTDGE.objects.containsKey(new_id)) {
-      TTDGE.error("Unable to update id. Given id '" + new_id + "' already in use.");
-    }
-    else {
-      this.id = new_id;
-    }
+    this.update_id(new_id);
   }
 
   protected void post_editing_action() {}
@@ -94,6 +102,7 @@ public abstract class TTDGEObject {
 
   public void destroy() {
     TTDGE.objects.remove(this.id);
+    this.destroyed = true;
   }
 
 }

@@ -1,6 +1,5 @@
 package ttdge;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
@@ -16,7 +15,7 @@ public class GameCharacter extends Thing {
 
   public int speed = 3;
 
-  public ArrayList<Item> inventory = new ArrayList<Item>();
+  public Inventory inventory;
 
   public HashSet<String> visited = new HashSet<String>();
 
@@ -29,6 +28,7 @@ public class GameCharacter extends Thing {
     super(id, name, description);
     this.room = room;
     this.room.add_thing(this);
+    this.inventory = new Inventory(this);
     radius = TTDGE.room_grid_size/3;
     if (TTDGE.player == null) {
       TTDGE.player = this;
@@ -44,6 +44,7 @@ public class GameCharacter extends Thing {
     this.path = json.getString("path");
     this.room_target_x = json.getInt("room_target_x");
     this.room_target_y = json.getInt("room_target_y");
+    this.inventory = new Inventory(json.getObject("inventory"), this);
     if (json.getBoolean("player")) {
       TTDGE.player = this;
     }
@@ -58,7 +59,7 @@ public class GameCharacter extends Thing {
     json.set("path", this.path);
     json.set("room_target_x", this.room_target_x);
     json.set("room_target_y", this.room_target_y);
-    // TODO: inventory
+    json.set("inventory", inventory.save_file_object());
     return json;
   }
 
@@ -429,27 +430,42 @@ public class GameCharacter extends Thing {
   }
 
   public void go_thing_here() {
-    Thing thing = thing_here();
-    if (thing != null) {
-      thing.go(this);
-      check_quests();
+    if (TTDGE.current_object == this.inventory && this.inventory.highlighted_item != null) {
+      this.inventory.highlighted_item.go(this);
     }
+    else {
+      Thing thing = thing_here();
+      if (thing != null) {
+        thing.go(this);
+      }
+    }
+    check_quests();
   }
 
   public void open_thing_here() {
-    Thing thing = thing_here();
-    if (thing != null) {
-      thing.open(this);
-      check_quests();
+    if (TTDGE.current_object == this.inventory && this.inventory.highlighted_item != null) {
+      this.inventory.highlighted_item.open(this);
     }
+    else {
+      Thing thing = thing_here();
+      if (thing != null) {
+        thing.open(this);
+      }
+    }
+    check_quests();
   }
 
   public void close_thing_here() {
-    Thing thing = thing_here();
-    if (thing != null) {
-      thing.open(this);
-      check_quests();
+    if (TTDGE.current_object == this.inventory && this.inventory.highlighted_item != null) {
+      this.inventory.highlighted_item.open(this);
     }
+    else {
+      Thing thing = thing_here();
+      if (thing != null) {
+        thing.open(this);
+      }
+    }
+    check_quests();
   }
 
   public void take_thing_here() {
@@ -461,11 +477,26 @@ public class GameCharacter extends Thing {
   }
 
   public void investigate_thing_here() {
-    Thing thing = thing_here();
-    if (thing != null) {
-      thing.investigate(this);
-      check_quests();
+    if (TTDGE.current_object == this.inventory && this.inventory.highlighted_item != null) {
+      this.inventory.highlighted_item.open(this);
     }
+    else {
+      Thing thing = thing_here();
+      if (thing != null) {
+        thing.investigate(this);
+      }
+    }
+    check_quests();
+  }
+
+  public boolean has_key(String key_id) {
+    if (TTDGE.keys.containsKey(key_id)) {
+      Key key = TTDGE.keys.get(key_id);
+      if (this.inventory.items.contains(key)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 

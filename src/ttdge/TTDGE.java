@@ -11,7 +11,7 @@ import ttdge.tasks.ObtainTask;
 import ttdge.tasks.VisitTask;
 
 public class TTDGE {
-  public final static String ENGINE_VERSION = "0.3.0";
+  public final static String ENGINE_VERSION = "0.4.0";
   protected static PApplet papplet = null;
   public static TTDGEExtender extender = null;
 
@@ -37,6 +37,7 @@ public class TTDGE {
   public static HashMap<String,TTDGEObject> objects = new HashMap<String,TTDGEObject>();
   public static HashMap<String,Room> rooms = new HashMap<String,Room>();
   public static HashMap<String,Item> items = new HashMap<String,Item>();
+  public static HashMap<String,Key> keys = new HashMap<String,Key>();
 
   public static ArrayList<Quest> quests = new ArrayList<Quest>();
   public static ArrayList<Quest> started_quests = new ArrayList<Quest>();
@@ -215,6 +216,23 @@ public class TTDGE {
   public static void draw() {
     if (TTDGE.current_object != null) {
       TTDGE.current_object.draw();
+    }
+  }
+
+  protected static void update_object_maps(TTDGEObject object, String new_id) {
+    objects.remove(object.id);
+    objects.put(new_id, object);
+    if (worlds.containsKey(object.id)) {
+      worlds.remove(object.id);
+      worlds.put(new_id, (World)object);
+    }
+    if (rooms.containsKey(object.id)) {
+      rooms.remove(object.id);
+      rooms.put(new_id, (Room)object);
+    }
+    if (items.containsKey(object.id)) {
+      items.remove(object.id);
+      items.put(new_id, (Item)object);
     }
   }
 

@@ -100,5 +100,11 @@ public class Obstacle extends Thing {
     return false;
   }
 
+  public Obstacle copy() {
+    JSON json = this.save_file_object();
+    json.set("id", this.new_id());
+    return new Obstacle(json, this.room);
+  }
+
 
 }
